@@ -14,7 +14,7 @@ export DEV_ENV=$(pwd)
 # for a specific install e.g.
 ./dev-env-og neovim
 # all
-./dev-env
+./dev-env-og
 ```
 
 ### Ref
