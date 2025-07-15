@@ -1,0 +1,31 @@
+export XDG_CONFIG_HOME=$HOME/.config
+VIM="nvim"
+
+PERSONAL=$XDG_CONFIG_HOME/personal
+for i in `find -L $PERSONAL`; do
+    source $i
+done
+
+## fuzzy finder 
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+export GIT_EDITOR=$VIM
+export DEV_ENV_HOME="$HOME/personal/dev-env"
+
+addToPath() {
+    if [[ "$PATH" != *"$1"* ]]; then
+        export PATH=$PATH:$1
+    fi
+}
+
+addToPathFront() {
+    if [[ "$PATH" != *"$1"* ]]; then
+        export PATH=$1:$PATH
+    fi
+}
+
+addToPathFront $HOME/.local/scripts
+addToPathFront $HOME/.local/bin
+addToPathFront $HOME/.local/apps/
+
+addToPath $HOME/.local/scripts
