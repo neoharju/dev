@@ -1,0 +1,4 @@
+#!/usr/bin/env/ bash
+
+paru -S --noconfirm --needed git base-devel gimp fzf btop
+paru -S ttf-font-awesome ttf-jetbrains-mono-nerd ttf-nerd-fonts-symbols
