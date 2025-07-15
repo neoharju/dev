@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+dry_run="0"
+
+if [ -z "$XDG_CONFIG_HOME" ]; then
+    echo "no xdg config home"
+    echo "using ~/.config"
+    XDG_CONFIG_HOME=$HOME/.config
+fi
+
+if [ -z "$DEV_ENV" ]; then
+    echo "env var DEV_ENV needs to be present"
+#    exit 1
+fi
+
+if [[ $1 == "--dry" ]]; then
+    dry_run="1"
+fi
+
+log() {
+   if [[ $dry == "1" ]]; then
+       echo "[DRY_RUN]: $1"
+    else
+        echo "$1"
+    fi
+}
+
+log "env: $DEV_ENV"
+
+execute() {
+    # log "execute $@"
+    if [[ $dry_run == "1" ]] ; then
+        return
+    fi
+    # else execute everything
+    "$@"
+}
+
+update_files() {
+    log "copying over files from: $1"
+    pushd $1 &> /dev/null
+    {
+        configs=$(find . -mindepth 1 -maxdepth 1 -type d)
+        for conf in $configs; do
+            # `${2%/}`: Removes any trailing slash from the second argument
+            # `${c#./}`: Removes the leading `./` from the directory name
+            directory=${2%/}/${conf#./}
+            log "    removing: rm -rf $directory"
+
+            execute  rm - rf $directory
+            log "    copying env: cp $conf $2"
+            execute  cp -r ./$conf $2
+        done
+
+    }
+    popd &> /dev/null
+}
+
+copy() {
+    log "removing: $2"
+    execute rm $2
+    log "copying: $1 to $2"
+    execute cp $1 $2
+}
+
+update_files $DEV_ENV/env/.config $XDG_CONFIG_HOME
+update_files $DEV_ENV/env/.local $HOME/.local
+
+copy $DEV_ENV/tmux-sessionizer/tmux-sessionizer $HOME/.local/scripts/tmux-sessionizer
+copy $DEV_ENV/env/.zsh_profile $HOME/.zsh_profile
+copy $DEV_ENV/env/.zshrc $HOME/.zshrc
+copy $DEV_ENV/env/.xprofile $HOME/.xprofile
+copy $DEV_ENV/env/.tmux-sessionizer $HOME/.tmux-sessionizer
+copy $DEV_ENV/dev-env $HOME/.local/scripts/dev-env
+
+hyprctl reload
