@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# fzf = fuzzy find
+selected=$(find ~/personal -mindepth 1  -maxdepth 1 -type d | fzf)
+if [[ -z "$selected" ]]; then
+    exit 0
+fi
+# tr: replace :,. or space with _
+selected_name=$(basename $selected | tr ":,. " "____")
+
+switch_to(){
+  if [[ -z "$TMUX" ]]; then
+      tmux attach-session -t $selected_name 
+  else
+      tmux switch-client -t $selected_name
+  fi
+}
+
+if tmux has-session -t=$selected_name 2> /dev/null; then
+    switch_to
+    exit 0
+fi 
+
+tmux new-session -ds $selected_name -c $selected
+switch_to
+# ^M is enter
+tmux send-keys -t $selected_name "ready-tmux" ^M
