@@ -9,7 +9,15 @@ export DEV_ENV=$(pwd)
 ./dev-env-og --dry
 ```
 
-### Install
+### Install packages; e.g. git, base-devel...
+```sh
+# for a specific install e.g.
+./run dev
+# all
+./run
+```
+
+### Install keybinds/configs/profiles/neovim lsps...
 ```sh
 # for a specific install e.g.
 ./dev-env-og neovim
