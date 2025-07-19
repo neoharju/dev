@@ -1,4 +1,16 @@
 #!/usr/bin/env/ bash
 
-paru -S --noconfirm --needed git base-devel gimp fzf btop
+paru -S --noconfirm --needed git base-devel gimp fzf btop go bc stylua npm
+go install github.com/air-verse/air@latest
 paru -S ttf-font-awesome ttf-jetbrains-mono-nerd ttf-nerd-fonts-symbols
+
+# Im using HyDE some of these and other things will be installed by HyDE
+# See: https://github.com/HyDE-Project/HyDE/blob/master/Scripts/pkg_core.lst
+# 
+# paru -S waybar
+# paru -S hyprlock --noconfirm -needed
+# paru -S hyprpaper hyprshot
+# paru -Syu wlogout-git --noconfirm --needed
+# paru -S ffmpeg aalib
+# -- Turso's sqlite
+# curl -sSfL https://get.tur.so/install.sh | bash
