@@ -26,3 +26,6 @@ vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")
 
 -- join line and keep cursor at place with mark
 vim.keymap.set("n", "J", "mzJ`z")
+
+-- delete into black hole register to avoid wiping recent yank reg
+vim.keymap.set({ "n", "v" }, "<leader>d", [["_dd]])
