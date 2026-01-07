@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+
+echo "----- NOW AT HyDE run ------"
+
+export CFLAGS="-march=native"
+export CXXFLAGS="-march=native"
+export RUSTFLAGS="-C target-cpu=native"
+
 git clone --depth 1 https://github.com/HyDE-Project/HyDE ~/HyDE
 cd ~/HyDE/Scripts
 ./install.sh

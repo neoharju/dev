@@ -1,5 +1,5 @@
-#!/usr/bin/env/ bash
-
+#!/usr/bin/env bash
+echo "------- NOW AT dev run -------"
 paru -S --noconfirm --needed git base-devel gimp fzf ripgrep btop go bc stylua npm
 go install github.com/air-verse/air@latest
 paru -S ttf-font-awesome ttf-jetbrains-mono-nerd ttf-nerd-fonts-symbols
