@@ -9,6 +9,19 @@ export DEV_ENV=$(pwd)
 ./dev-env-og --dry
 ```
 
+### Test run scripts with Docker
+```sh
+docker build -t archenjoyer .
+docker run --rm -it --tmpfs /tmp archenjoyer sh
+```
+While inside the container 
+```sh
+git clone https://github.com/neoharju/dev.git
+cd dev
+export DEV_ENV=$(pwd)
+./run
+```
+
 ### Install packages; e.g. git, base-devel...
 ```sh
 # for a specific install e.g.
