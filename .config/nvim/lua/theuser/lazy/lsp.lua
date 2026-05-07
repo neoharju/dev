@@ -29,7 +29,7 @@ return {
 		require("conform").setup({
 			format_on_save = {
 				lsp_fallback = true,
-				timout_ms = 1000,
+				timeout_ms = 1000,
 			},
 			formatters_by_ft = {
 				python = { "black" },
@@ -122,8 +122,15 @@ return {
 				["clangd"] = function()
 					require("lspconfig").clangd.setup({
 						capabilities = capabilities,
-						cmd = { "clangd", "--fallback-style=Google" },
-						filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "cu" },
+						cmd = {
+							"clangd",
+							"--background-index",
+							"--clang-tidy",
+							"--completion-style=detailed",
+							"--header-insertion=never",
+							"--fallback-style=Google",
+						},
+						filetypes = { "c", "cc", "cpp", "objc", "objcpp", "cuda", "cu" },
 					})
 				end,
 
@@ -156,6 +163,7 @@ return {
 			mapping = cmp.mapping.preset.insert({
 				["<C-p>"] = cmp.mapping.select_prev_item(cmp_select),
 				["<C-n>"] = cmp.mapping.select_next_item(cmp_select),
+				["<Tab>"] = cmp.mapping.confirm({ select = true }),
 				["<C-y>"] = cmp.mapping.confirm({ select = true }),
 				["<C-Space>"] = cmp.mapping.complete(),
 			}),
