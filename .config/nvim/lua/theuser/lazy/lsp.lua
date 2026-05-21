@@ -27,19 +27,7 @@ return {
 
 	config = function()
 		require("conform").setup({
-			format_on_save = {
-				lsp_fallback = true,
-				timeout_ms = 1000,
-			},
-			formatters_by_ft = {
-				python = { "black" },
-				c = { "clang_format" },
-				cpp = { "clang_format" },
-				cuda = { "clang_format" },
-				rust = { "rustfmt" },
-				go = { "gofmt" },
-				lua = { "stylua" },
-			},
+			formatters_by_ft = {},
 		})
 		local cmp = require("cmp")
 		local cmp_lsp = require("cmp_nvim_lsp")
@@ -74,12 +62,12 @@ return {
 						settings = {
 							Lua = {
 								format = {
-									enable = true,
+									enable = false,
 									-- Put format options here
 									-- NOTE: the value should be STRING!!
 									defaultConfig = {
 										indent_style = "space",
-										indent_size = "2",
+										indent_size = "4",
 									},
 								},
 							},
@@ -122,15 +110,17 @@ return {
 				["clangd"] = function()
 					require("lspconfig").clangd.setup({
 						capabilities = capabilities,
+						on_attach = function(client)
+							client.server_capabilities.documentFormattingProvider = false
+						end,
 						cmd = {
 							"clangd",
 							"--background-index",
 							"--clang-tidy",
 							"--completion-style=detailed",
-							"--header-insertion=never",
-							"--fallback-style=Google",
+							"--header-insertion=iwyu",
 						},
-						filetypes = { "c", "cc", "cpp", "objc", "objcpp", "cuda", "cu" },
+						filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "cu" },
 					})
 				end,
 
