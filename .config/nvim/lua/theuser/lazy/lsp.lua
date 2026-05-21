@@ -12,34 +12,27 @@ local root_files = {
 return {
 	"neovim/nvim-lspconfig",
 	dependencies = {
-		"stevearc/conform.nvim", -- Formatter
-		"williamboman/mason.nvim", -- LSP/DAP/bin installer
-		"williamboman/mason-lspconfig.nvim", -- Bridge Mason with lspconfig
-		"hrsh7th/cmp-nvim-lsp", -- LSP completion source
-		"hrsh7th/cmp-buffer", -- Buffer text as completion source
-		"hrsh7th/cmp-path", -- Path completion
-		"hrsh7th/cmp-cmdline", -- Snippet engine
-		"hrsh7th/nvim-cmp", -- Completion engine
-		"L3MON4D3/LuaSnip", -- Snippet engine
-		"saadparwaiz1/cmp_luasnip", -- LuaSnip completion
-		"j-hui/fidget.nvim", -- LSP Progress UI
+		"williamboman/mason.nvim",
+		"williamboman/mason-lspconfig.nvim",
+		"hrsh7th/cmp-nvim-lsp",
+		"hrsh7th/cmp-buffer",
+		"hrsh7th/cmp-path",
+		"hrsh7th/cmp-cmdline",
+		"hrsh7th/nvim-cmp",
+		"L3MON4D3/LuaSnip",
+		"saadparwaiz1/cmp_luasnip",
+		"j-hui/fidget.nvim",
 	},
-
 	config = function()
-		require("conform").setup({
-			formatters_by_ft = {},
-		})
 		local cmp = require("cmp")
 		local cmp_lsp = require("cmp_nvim_lsp")
-		local capabilities = vim.tbl_deep_extend(
-			"force",
-			{},
-			vim.lsp.protocol.make_client_capabilities(),
-			cmp_lsp.default_capabilities()
-		)
 
-		require("fidget").setup({}) -- LSP progress in corner
-		require("mason").setup() -- Installs LSP servers, formatters, etc.
+		-- Base capabilities shared by all servers
+		local capabilities =
+			vim.tbl_deep_extend("force", vim.lsp.protocol.make_client_capabilities(), cmp_lsp.default_capabilities())
+
+		require("fidget").setup({})
+		require("mason").setup()
 		require("mason-lspconfig").setup({
 			ensure_installed = {
 				"lua_ls",
@@ -49,48 +42,41 @@ return {
 				"clangd",
 			},
 			handlers = {
-				function(server_name) -- default handler (optional)
-					require("lspconfig")[server_name].setup({
-						capabilities = capabilities,
-					})
+				-- Default handler
+				function(server_name)
+					require("lspconfig")[server_name].setup({ capabilities = capabilities })
 				end,
 
 				["lua_ls"] = function()
-					local lspconfig = require("lspconfig")
-					lspconfig.lua_ls.setup({
+					require("lspconfig").lua_ls.setup({
 						capabilities = capabilities,
 						settings = {
 							Lua = {
-								format = {
-									enable = false,
-									-- Put format options here
-									-- NOTE: the value should be STRING!!
-									defaultConfig = {
-										indent_style = "space",
-										indent_size = "4",
-									},
+								runtime = { version = "LuaJIT" },
+								workspace = {
+									checkThirdParty = false,
+									library = vim.api.nvim_get_runtime_file("", true),
 								},
+								diagnostics = { globals = { "vim" } },
+								format = { enable = false },
+								telemetry = { enable = false },
 							},
 						},
 					})
 				end,
 
-				-- Rust
 				["rust_analyzer"] = function()
 					require("lspconfig").rust_analyzer.setup({
 						capabilities = capabilities,
 						settings = {
 							["rust-analyzer"] = {
 								cargo = { allFeatures = true },
-								checkOnSave = {
-									command = "clippy",
-								},
+								check = { command = "clippy" }, -- checkOnSave is deprecated
 							},
 						},
 					})
 				end,
 
-				-- Python
 				["pyright"] = function()
 					require("lspconfig").pyright.setup({
 						capabilities = capabilities,
@@ -99,18 +85,23 @@ return {
 								analysis = {
 									autoSearchPaths = true,
 									useLibraryCodeForTypes = true,
-									typeCheckingMode = "basic", -- or "strict"
+									typeCheckingMode = "basic",
 								},
 							},
 						},
 					})
 				end,
 
-				-- C++ / CUDA
 				["clangd"] = function()
+					-- clangd requires utf-16; cmp advertises utf-8 too which causes
+					-- offset encoding conflicts and broken diagnostics positions.
+					local clangd_caps = vim.tbl_deep_extend("force", {}, capabilities)
+					clangd_caps.offsetEncoding = { "utf-16" }
+
 					require("lspconfig").clangd.setup({
-						capabilities = capabilities,
+						capabilities = clangd_caps,
 						on_attach = function(client)
+							-- Formatting handled by conform/clang-format, not LSP
 							client.server_capabilities.documentFormattingProvider = false
 						end,
 						cmd = {
@@ -119,12 +110,13 @@ return {
 							"--clang-tidy",
 							"--completion-style=detailed",
 							"--header-insertion=iwyu",
+							"--offset-encoding=utf-16",
 						},
-						filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "cu" },
+						-- "cu" is a file extension, not a filetype; cuda covers .cu files
+						filetypes = { "c", "cpp", "objc", "objcpp", "cuda" },
 					})
 				end,
 
-				-- Go
 				["gopls"] = function()
 					require("lspconfig").gopls.setup({
 						capabilities = capabilities,
@@ -143,11 +135,10 @@ return {
 		})
 
 		local cmp_select = { behavior = cmp.SelectBehavior.Select }
-
 		cmp.setup({
 			snippet = {
 				expand = function(args)
-					require("luasnip").lsp_expand(args.body) -- For `luasnip` users.
+					require("luasnip").lsp_expand(args.body)
 				end,
 			},
 			mapping = cmp.mapping.preset.insert({
@@ -159,22 +150,30 @@ return {
 			}),
 			sources = cmp.config.sources({
 				{ name = "nvim_lsp" },
-				{ name = "luasnip" }, -- For luasnip users.
+				{ name = "luasnip" },
 			}, {
 				{ name = "buffer" },
 			}),
 		})
 
 		vim.diagnostic.config({
-			-- update_in_insert = true,
+			virtual_text = {
+				prefix = "#",
+				spacing = 4,
+				source = true,
+			},
 			float = {
 				focusable = false,
 				style = "minimal",
 				border = "rounded",
-				source = "always",
+				source = true,
 				header = "",
 				prefix = "",
 			},
+			signs = true,
+			underline = true,
+			update_in_insert = false,
+			severity_sort = true,
 		})
 	end,
 }

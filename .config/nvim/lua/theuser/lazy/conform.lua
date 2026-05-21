@@ -1,10 +1,11 @@
 return {
 	"stevearc/conform.nvim",
-	opts = {},
+	event = { "BufWritePre" },
+	cmd = { "ConformInfo" },
 	config = function()
 		require("conform").setup({
 			format_on_save = {
-				timeout_ms = 5000,
+				timeout_ms = 1000, -- 5000 will visibly stall saves
 				lsp_format = "fallback",
 			},
 			formatters_by_ft = {
@@ -13,7 +14,7 @@ return {
 				cuda = { "clang-format" },
 				go = { "gofmt" },
 				lua = { "stylua" },
-				python = { "black", "ruff_format" },
+				python = { "ruff_format" }, -- black + ruff_format conflict; pick one
 				rust = { "rustfmt" },
 			},
 			formatters = {
@@ -24,7 +25,7 @@ return {
 		})
 
 		vim.keymap.set("n", "<leader>f", function()
-			require("conform").format({ bufnr = 0 })
-		end)
+			require("conform").format({ bufnr = vim.api.nvim_get_current_buf() })
+		end, { desc = "Format buffer" })
 	end,
 }
