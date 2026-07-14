@@ -249,14 +249,3 @@ private/
 secret/
 secrets/
 
-# =========================
-# Allow important tracked dotfiles
-# =========================
-
-!.config/
-!.config/**
-
-!.bashrc
-!.zshrc
-!.vimrc
-!.gitconfig
