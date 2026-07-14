@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# https://github.com/vim/vim/tags
+# vim is using fortify=1
+
+git clone https://github.com/vim/vim.git $HOME/personal/vim
+cd $HOME/personal/vim/src
+
+sudo make clean
+sudo make uninstall
+sudo make distclean
+CFLAGS="-O3 -march=native -flto -pipe" \
+./configure \ 
+		--prefix=/usr/local \ 
+		--with-features=huge \ 
+		--enable-python3interp=yes \
+	    --disable-gui \  
+	    --enable-clipboard \ 
+		--enable-terminal \ 
+		--enable-cscope \ 
+		--enable-multibyte \  
+		--enable-gpm=yes
+make -j8
+sudo make install -j8
+
