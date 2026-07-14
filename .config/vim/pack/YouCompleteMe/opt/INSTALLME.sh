@@ -4,7 +4,7 @@
 git clone --recurse-submodules https://github.com/ycm-core/YouCompleteMe.git ~/.config/vim/pack/YouCompleteMe/opt/YouCompleteMe
 
 pushd ~/.config/vim/pack/YouCompleteMe/opt/YouCompleteMe
-export CXXFLAGS=["-O3 -march=native"] ./install.py --all
+export CXXFLAGS="-O3 -march=native" ./install.py --all
 popd
 
 
