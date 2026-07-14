@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 
-sudo pacman -Sy cmake gettext lua 
-sudo pacman -S --noconfirm lua51 luarocks
-sudo luarocks install luacheck
-
 git clone -b stable https://github.com/neovim/neovim.git $HOME/personal/neovim
 cd $HOME/personal/neovim
-make CMAKE_BUILD_TYPE=RelWithDebInfo
+make CMAKE_BUILD_TYPE=Release
 sudo make install
 
 git clone https://github.com/nvim-lua/plenary.nvim.git $HOME/personal/plenary.nvim
