@@ -1,4 +1,3 @@
-
 # =========================
 # OS / filesystem metadata
 # =========================
@@ -33,6 +32,7 @@ Session.vim
 autoload/plugged/
 plugged/
 pack/*/opt/*
+.viminfo
 
 # =========================
 # Shell history / runtime
@@ -50,6 +50,14 @@ pack/*/opt/*
 .zsh_sessions/
 bash_sessions/
 
+# Database / REPL history (can contain sensitive queries or pasted secrets)
+.mysql_history
+.psql_history
+.sqlite_history
+.rediscli_history
+.irb_history
+.dbshell
+
 # =========================
 # Secrets and credentials
 # =========================
@@ -59,9 +67,15 @@ bash_sessions/
 *.pem
 *.key
 *.pub
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+*.ppk
 
 # GPG
 .gnupg/
+*.asc
 
 # Cloud credentials
 .aws/
@@ -79,6 +93,44 @@ bash_sessions/
 # Password managers
 .password-store/
 .keepassxc/
+*.kdbx
+
+# Netrc - plaintext creds used by curl/ftp/git/many CLIs
+.netrc
+_netrc
+
+# Git's own stored credentials (plaintext by default)
+.git-credentials
+
+# direnv - commonly used to export secrets as env vars
+.envrc
+.direnv/
+
+# Package manager auth tokens
+.npmrc
+.pypirc
+.cargo/credentials
+.cargo/credentials.toml
+.gem/credentials
+
+# Container / registry auth
+.docker/config.json
+
+# Infrastructure as code - state files and vars often contain secrets
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+.vault-token
+
+# Certs / keystores that bundle private keys
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# VPN configs (often embed auth)
+*.ovpn
 
 # =========================
 # User application state
@@ -125,7 +177,6 @@ cmake-build-*/
 CMakeFiles/
 CMakeCache.txt
 CTestTestfile.cmake
-Makefile
 compile_commands.json
 *.o
 *.obj
@@ -248,4 +299,3 @@ hostname/
 private/
 secret/
 secrets/
-
