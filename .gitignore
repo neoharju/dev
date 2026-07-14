@@ -1,0 +1,262 @@
+
+# =========================
+# OS / filesystem metadata
+# =========================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux filesystem trash
+.Trash-*
+.nfs*
+
+# =========================
+# Editors / IDEs
+# =========================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.#*
+Session.vim
+
+# Vim / Neovim generated state
+.netrwhist
+.view/
+*.vim
+autoload/plugged/
+plugged/
+pack/*/opt/*
+
+# =========================
+# Shell history / runtime
+# =========================
+
+.bash_history
+.zsh_history
+.fish_history
+.python_history
+
+.lesshst
+.node_repl_history
+
+# Shell sessions
+.zsh_sessions/
+bash_sessions/
+
+# =========================
+# Secrets and credentials
+# =========================
+
+# SSH
+.ssh/
+*.pem
+*.key
+*.pub
+
+# GPG
+.gnupg/
+
+# Cloud credentials
+.aws/
+.azure/
+.gcloud/
+.kube/
+
+# Environment files
+.env
+.env.*
+*.secret
+*.token
+*.credentials
+
+# Password managers
+.password-store/
+.keepassxc/
+
+# =========================
+# User application state
+# =========================
+
+.cache/
+.local/share/
+.local/state/
+.local/tmp/
+
+# Runtime files
+/run/
+*.pid
+*.lock
+
+# Browsers
+.mozilla/
+.config/google-chrome/
+.config/chromium/
+
+# =========================
+# Desktop environments
+# =========================
+
+.config/gtk-*/
+.config/dconf/
+.config/autostart/*.desktop
+
+# KDE
+.config/kdeglobals
+.config/plasma-org.kde.*
+
+# GNOME
+.config/gnome-initial-setup/
+.local/share/gnome-shell/
+
+# =========================
+# Build systems
+# =========================
+
+build/
+_build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+CTestTestfile.cmake
+Makefile
+compile_commands.json
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.dylib
+
+# =========================
+# C / C++ tooling
+# =========================
+
+.clangd/
+.cache/clangd/
+.clang-format.cache
+
+# Conan
+.conan/
+conan.lock
+
+# vcpkg
+vcpkg_installed/
+
+# Meson
+.meson/
+meson-private/
+meson-logs/
+
+# =========================
+# CUDA / NVIDIA
+# =========================
+
+# CUDA build artifacts
+*.cu.o
+*.cubin
+*.fatbin
+*.ptx
+
+# Nsight
+.nvvp/
+.nsys/
+*.qdrep
+*.sqlite
+
+# CUDA cache
+~/.nv/
+
+# =========================
+# Python
+# =========================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+.venv/
+venv/
+env/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# =========================
+# Node / JS tooling
+# =========================
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+.npm/
+.yarn/
+
+# =========================
+# Rust
+# =========================
+
+target/
+Cargo.lock
+
+# =========================
+# Go
+# =========================
+
+bin/
+pkg/
+
+# =========================
+# Logs / temporary files
+# =========================
+
+*.log
+*.tmp
+*.bak
+*.orig
+
+tmp/
+temp/
+
+# =========================
+# Dotfiles repo itself
+# =========================
+
+# Machine-specific overrides
+.local-machine/
+machine/
+hostname/
+
+# Backup files
+*.backup
+*.old
+
+# Private overrides
+private/
+secret/
+secrets/
+
+# =========================
+# Allow important tracked dotfiles
+# =========================
+
+!.config/
+!.config/**
+
+!.bashrc
+!.zshrc
+!.vimrc
+!.gitconfig
