@@ -1,281 +1,245 @@
-" For whatever reason defaults werent loaded at start in newest Vim build 
-source $VIMRUNTIME/defaults.vim
+" ============================================================================
+" vimrc
+"
+" Requirements:
+"   - Tested with Vim 9.2 with +terminal, +clipboard
+"   - tokyonight.vim colorscheme          (github.com/folke/tokyonight.nvim)
+"   - YouCompleteMe + clangd on PATH      (github.com/ycm-core/YouCompleteMe)
+"   - ripgrep (rg), for :grep
+"
+" Missing any of the above degrades gracefully rather than breaking the
+" rest of this file - see the "silent!" / executable() guards below.
+"
+" Contents:
+"   1.  General
+"    1.2.  Leader keys
+"    1.3.  Appearance & terminal
+"    1.4.  Indentation
+"    1.5.  Search
+"    1.6.  Files, splits & undo
+"    1.7.  Editing this vimrc
+"    1.8.  Helper functions
+"   2. Statusline                           
+"   3. Key mappings                         
+"   4. Filetype autocommands (cpp/python/vim) 
+"   5. Abbreviations                        
+"   6. Plugin: YouCompleteMe                
+" ============================================================================
+
+" silent! in case a minimal Vim build doesn't ship defaults.vim
+silent! source $VIMRUNTIME/defaults.vim
+
 syntax on
 filetype plugin indent on
 
+" ----------------------------------------------------------------------------
+" 1. General              {{{
+" ----------------------------------------------------------------------------
+set nocompatible          " Already implied by defaults.vim; kept explicit
+set modelines=0           " Disable modelines (security)
+set mouse=a                " Enable mouse, e.g. for resizing splits
 
-" ###############################
-" ### Custom settings
-" ###############################
+" ----------------------------------------------------------------------------
+" 1.2. Leader keys
+" ----------------------------------------------------------------------------
+let mapleader = ' '
+let maplocalleader = '\'
 
-let mapleader = " "
-let maplocalleader = "\\"
+" ----------------------------------------------------------------------------
+" 1.3. Appearance & terminal
+" ----------------------------------------------------------------------------
+set encoding=utf-8
+set ttyfast                " Assume a fast terminal connection (smoother redraws)
+set termguicolors          " 24-bit color in the terminal
 
-" Cursor insert mode: thin vertical bar
+" silent! so a missing colorscheme doesn't abort the rest of this file
+" (see chat: an erroring `colorscheme` stops the whole vimrc from loading)
+silent! colorscheme tokyonight-night
+
+set number                 " Absolute number on the cursor line...
+set relativenumber         " ...relative numbers elsewhere (hybrid line numbers)
+set numberwidth=4
+set signcolumn=yes         " Always show the sign column (avoids text shifting)
+set colorcolumn=+1,+2,+3   " Mark columns just past 'textwidth'
+set scrolloff=14           " Keep 14 lines of context around the cursor
+set wrap
+set breakindent            " Indent wrapped lines to match the start of the line
+
+" Visualize tabs, trailing whitespace, non-breaking spaces
+set listchars=tab:»\ ,trail:.,nbsp:␣
+" Show each tabstop-width run of leading spaces as "---+"
+set listchars+=leadmultispace:---+
+
+" Cursor shape: thin bar in insert mode, block in normal mode.
+" Raw terminal escape codes - works over SSH/tmux, terminal Vim only.
 let &t_SI = "\<Esc>[5 q"
-" Cursor normal mode: block cursor
 let &t_EI = "\<Esc>[2 q"
 
-" Not vi compatible
-set nocompatible
-set modelines=0
-
-
-colorscheme tokyonight-night
-
-"rendering
-set ttyfast
-set encoding=utf-8
-
-set number
-set relativenumber
-set numberwidth=4
-set shiftwidth=4
-set tabstop=4
-set softtabstop=4
-set breakindent
+" ----------------------------------------------------------------------------
+" 1.4. Indentation
+" ----------------------------------------------------------------------------
+set shiftwidth=4        " Width used by >>, <<, and autoindent
+set tabstop=4           " Width a literal <Tab> character is displayed as
+set softtabstop=4       " Width inserted/removed when pressing <Tab>/<BS>
 set smartindent
+set textwidth=80        " Hard-wrap column for gq; also drives colorcolumn above
 
-set wrap
-set textwidth=80
-set colorcolumn=+1,+2,+3
-
-set scrolloff=14
-set termguicolors
-set updatetime=300
-
+" ----------------------------------------------------------------------------
+" 1.5. Search
+" ----------------------------------------------------------------------------
 set hlsearch
 set incsearch
 set ignorecase
-set smartcase
+set smartcase           " ...unless the pattern has an uppercase letter
 
-" Decrease mapped sequence wait time
-set timeoutlen=300
-" Configure how new splits should be opened
-set splitright
-set splitbelow
-" Keep signcolumn on by default
-set signcolumn=yes
-" Enable undo/redo changes even after closing and reopening file
-set undofile
-" Enable mouse, eg for resizing splits
-set mouse=a
-" Decrease update time for swp from 4000ms
-set updatetime=300
+" ----------------------------------------------------------------------------
+" 1.6. Files, splits & undo
+" ----------------------------------------------------------------------------
+set splitright          " Vertical splits open to the right
+set splitbelow          " Horizontal splits open below
+set undofile            " Persist undo history across sessions
+set updatetime=300      " Faster swapfile writes / CursorHold triggers
+set timeoutlen=300      " Shorter wait for mapped key sequences
 
-" Visualize tabs, spaces, nbsp
-set listchars=tab:»\ ,trail:.,nbsp:␣
-set listchars+=leadmultispace:---+
-
-" open .vimrc in vsplit
-nnoremap -ev :vsplit $MYVIMRC<cr>
-" source mapping
-nnoremap -sv :source $MYVIMRC<cr>
-
-" We are using wayland clipboard - wl-clipboard
+" vim9.2 yanks to OS clipboard in Wayland with e.g. "+yy 
 " set clipboard=
 
-" YouCompleteMe             ----------- {{{
-" https://github.com/ycm-core/youcompleteme
-packadd YouCompleteMe
-" Semantic support for C-family
-let g:ycm_clangd_binary_path = "/usr/bin/clangd"
-" disable diagnostics in insert mode
-let g:ycm_update_diagnostics_in_insert_mode=0
-" diagnostics to the right of the line in the window using virtual text
-" options: 1/0/'virtual-text'
-"let g:ycm_echo_current_diagnostics = 'virtual-text'
-let g:ycm_enable_inlay_hints = 1
-let g:ycm_echo_current_diagnostics = 'virtual-text'
-" disable inlay hints in insert mode
-" let g:ycm_clear_inlay_hints_in_insert_mode = 1
-" show diagnostics in popup when :YcmShowDetailedDiagnostic is invoked (?)
-let g:ycm_show_detailed_diag_in_popup = 1
+" ----------------------------------------------------------------------------
+" 1.7. Editing this vimrc
+" ----------------------------------------------------------------------------
+nnoremap <leader>ev :vsplit $MYVIMRC<CR>
+nnoremap <leader>sv :source $MYVIMRC<CR>
 
-" Errors coloring
-hi YcmErrorLine      guibg=#2d202a
-hi YcmErrorSection   guifg=#f7768e guibg=#2d202a
-" Warning coloring
-hi YcmWarningLine    guibg=#2f2b1f
-hi YcmWarningSection guifg=#e0af68 guibg=#2f2b1f
-
-augroup YCMCustom
-  autocmd!
-  " FileType c,cpp
-  autocmd FileType c,cpp,cuda,python let b:ycm_hover = {
-    \ 'command': 'GetDoc',
-    \ 'syntax': &filetype,
-    \ 'popup_params': {
-	\     'opacity': 90,
-	\	  'pos': "topright",
-	\	  'line':"cursor", 
-	\	  'col': 121,
-	\	  'fixed': v:true,
-    \     'maxwidth': 80,
-    \   },
-    \ }
-augroup END
-
-" toggle YCM inlay hints
-nnoremap <localleader>hi <Plug>(YCMToggleInlayHints)
-" toggle YCM popup
-nnoremap <localleader>ho <Plug>(YCMHover)
-
-nnoremap <localleader>hd :YcmShowDetailedDiagnostic<CR>
-nnoremap <localleader>gd :YcmCompleter GoToDefinition<CR>
-nnoremap <localleader>gr :YcmCompleter GoToReferences<CR>
-nnoremap <localleader>gi :YcmCompleter GoToImplementation<CR>
-nnoremap <localleader>rn :YcmCompleter RefactorRename 
-nnoremap <localleader>fo  :YcmCompleter Format<CR>
-nnoremap <localleader>fix :YcmCompleter FixIt<CR>
+" ----------------------------------------------------------------------------
+" 8. Helper functions
+" ----------------------------------------------------------------------------
+" Reindent the whole buffer while preserving the cursor position.
+" (Plain `normal gg=G` would otherwise leave the cursor on the last line.)
+function! s:FormatBuffer() abort
+  normal! mzgg=G`z
+endfunction
 " }}}
 
-" Statusline settings     ------------- {{{
+" ----------------------------------------------------------------------------
+"  2. Statusline settings     {{{
+" ----------------------------------------------------------------------------
+" filename | flags | = | filetype | Spaces/Tabs : tab N/M | line:col | pos%
 set laststatus=2
 set statusline=%#StatusLine#
 set statusline+=\ %f
 set statusline+=%h%m%r
 set statusline+=%=
-set statusline+=\ %y
-set statusline+=\ \ %{&expandtab?'Spaces':'Tabs'}
+set statusline+=\ %y
+set statusline+=\ \ %{&expandtab?'Spaces':'Tabs'}
 set statusline+=:\ %{tabpagenr()}/%{tabpagenr('$')}
-set statusline+=\ \ %l:%c
-set statusline+=\ \ %p%%
+set statusline+=\ \ %l:%c
+set statusline+=\ \ %p%%
 " }}}
+  
+" ----------------------------------------------------------------------------
+" 3. Key mappings       {{{
+" ----------------------------------------------------------------------------
 
-" Key mappings       ------------ {{{
+" -- Terminal ------------------------------------------------------------
+tnoremap <Esc><Esc> <C-\><C-n>:q!<CR>   " Force-exit terminal mode
 
-" force exit terminal mode
-tnoremap <Esc><Esc> <C-\><C-n>:q!<CR>
+" -- Yank / delete ---------------------------------------------------------
+vnoremap <leader>y "+y                  " Copy visual selection to "+
+nnoremap <leader>Y :%y+<CR>              " Copy entire file to "+
+nnoremap <leader>d "_dd                  " Delete line to blackhole (keep last yank)
+inoremap <c-d> <esc>ddi                  " Delete line in insert mode
 
-" copy visualized part to "+y
-vnoremap <leader>y "+y
-" copy entire file 
-"nnoremap <leader>Y mzggvG"+y`z
-nnoremap <leader>Y :%y+<CR>
-
-" delete to blackhole register to avoid wiping recent yank
-nnoremap <leader>d "_dd
-" delete line in insert mode
-inoremap <c-d> <esc>ddi
-
-" UPPERCASE word in visual mode
+" -- Case conversion ---------------------------------------------------------
+" NOTE: overrides native insert-mode <C-u> ("delete to start of insertion").
 vnoremap <c-u> U
-" UPPERCASE word in insert mode
 inoremap <c-u> <esc>viwUea
-" UPPERCASE word in normal mode
 nnoremap <c-u> viwU
 
-" move line down
+" -- Line movement -----------------------------------------------------------
+" NOTE: overrides native J (join lines) / K (keyword lookup).
 nnoremap J ddp
-" move line up
 nnoremap K ddkP
-" highlight word in normal mode
-nnoremap <leader><space> viw
 
-" quote a word with "
+" -- Selection / quoting -------------------------------------------------
+nnoremap <leader><space> viw            " Select word under cursor
 nnoremap <leader>" viw<esc>a"<esc>bi"<esc>lel
-" quote a word with '
 nnoremap <leader>' viw<esc>a'<esc>bi'<esc>lel
 
-"exit insert mode
+" -- Insert mode -----------------------------------------------------------
 inoremap jk <esc>
-"remove Ctrl-c habit from insert mode
-inoremap <c-c> <nop>
-
-" dp =  delete text inside parentheses
-" with dp
-onoremap p i(
-
-" cin( = delete content in the next parentheses
-"        and put you in insert mode
-"onoremap in( :<c-u>normal! /(vi(<cr>
-onoremap in( :<C-u>call search('(', 'W')<Bar>normal! vi(<CR>
-
-" cil( = delete content in the last parentheses
-"		and put in in insert mode
-" onoremap il( :<c-u>normal! F)vi(<cr>
-onoremap il( :<C-u>call search(')', 'bW')<Bar>normal! vi(<CR>
-
-" db =  delete until return (vim search)
-onoremap b /return<cr>
-
-" open prev buffer
-nnoremap <leader>re :execute "rightbelow vsplit " . bufname("#")<CR>
-" add ; to end of the line
-nnoremap <leader>;  mqA;<Esc>`q
-
-" match trailing whitespace
-" nnoremap <leader>w :match ErrorMsg /\s\+$/<CR>
-
-" clear search
-nnoremap <Esc> :nohlsearch<CR>
-
-"Grep
-set grepprg=rg\ --vimgrep
-nnoremap <leader>g :silent execute "grep  " . shellescape(expand("<cWORD>")) . " . "<cr>:copen<cr>
-" Quick fix navigation
-nnoremap <C-k> :cnext<CR>zz
-nnoremap <C-j> :cprevious<CR>zz
-nnoremap <leader>jk :cclose<CR>
-
-" Movement in insert mode
+inoremap <c-c> <nop>                     " Break the Ctrl-c habit
+" NOTE: <C-i> is the same byte as <Tab> in a terminal, so this also
+" remaps Tab in insert mode.
+inoremap <c-i> <esc>I
 inoremap <c-h> <left>
 inoremap <c-j> <down>
 inoremap <c-k> <up>
 inoremap <c-l> <right>
 inoremap <c-a> <end>
-inoremap <c-i> <esc>I
 
-" save file
+" -- Text objects (operator-pending) -----------------------------------------
+onoremap p i(                                                  " dp = delete inside ()
+onoremap in( :<C-u>call search('(', 'W')<Bar>normal! vi(<CR>   " next ()
+onoremap il( :<C-u>call search(')', 'bW')<Bar>normal! vi(<CR>  " last ()
+onoremap b /return<cr>                                         " db = delete until 'return'
+
+" -- Buffers / windows --------------------------------------------------------
+nnoremap <leader>re :execute "rightbelow vsplit " . bufname("#")<CR>
+
+" -- Misc edits ---------------------------------------------------------------
+nnoremap <leader>; mqA;<Esc>`q            " Append ; to end of line
+nnoremap <Esc> :nohlsearch<CR>
 nnoremap <leader>s :w<CR>
+nnoremap <leader>li :set list!<CR>        " Toggle tabs/spaces/trail display
 
-" Keep cursor centered for search and unfold minimally
+" -- Search / quickfix ---------------------------------------------------
+if executable('rg')
+  set grepprg=rg\ --vimgrep
+endif
+nnoremap <leader>g :silent execute 'grep ' . shellescape(expand('<cWORD>')) . ' .'<CR>:copen<CR>
+nnoremap <C-k> :cnext<CR>zz
+nnoremap <C-j> :cprevious<CR>zz
+nnoremap <leader>jk :cclose<CR>
+
+" Keep cursor centered while searching, unfold minimally
 nnoremap n nzzzv
 nnoremap N Nzzzv
 
-" commentary.vim
-" gc comment/uncomment visual selection
-" gcc comment/uncomment a line
+" commentary.vim: 
+"   gc comments visual selection
+"   gcc comments a line
 
-" Toggle show tabs/spaces/trails
-nnoremap <leader>li :set list!<CR>
 " }}}
 
-" cpp autocommands        ------------- {{{
+" ----------------------------------------------------------------------------
+" 4. Filetype autocommands   {{{
+" ----------------------------------------------------------------------------
 augroup filetype_cpp
-	autocmd!
-	" if ()
-	autocmd FileType cpp :iabbrev <buffer> iff if ()<left>
-	" format on save
-	autocmd BufWritePre *.cpp :normal gg=G
-	" abbreviations
-	autocmd FileType cpp iabbrev <buffer> cout std::cout <<
-	autocmd FileType cpp iabbrev <buffer> nl << '\n';
-	" folding
-	autocmd FileType cpp setlocal foldmethod=indent
-	" quick asm display
-	autocmd FileType cpp nnoremap <buffer> <leader>asm :CppShowAsm<CR>
+  autocmd!
+  autocmd FileType cpp iabbrev <buffer> iff if ()<left>
+  autocmd FileType cpp iabbrev <buffer> cout std::cout <<
+  autocmd FileType cpp iabbrev <buffer> nl << '\n';
+  autocmd FileType cpp setlocal foldmethod=indent
+  autocmd FileType cpp nnoremap <buffer> <leader>asm :CppShowAsm<CR>
+  autocmd BufWritePre *.cpp silent! call s:FormatBuffer()
 augroup END
-" }}}
 
-" python autocommands     ------------- {{{
 augroup filetype_python
-	autocmd!
-	autocmd BufWritePre *.py :normal gg=G
-	autocmd FileType python :iabbrev <buffer> iff if ():<left>
-	autocmd FileType python setlocal foldmethod=indent
+  autocmd!
+  autocmd FileType python iabbrev <buffer> iff if ():<left>
+  autocmd FileType python setlocal foldmethod=indent
+  autocmd BufWritePre *.py silent! call s:FormatBuffer()
 augroup END
-" }}}
 
-" Vimscript file settings ------------- {{{
 augroup filetype_vim
-	autocmd!
-	autocmd FileType vim setlocal foldmethod=marker
+  autocmd!
+  autocmd FileType vim setlocal foldmethod=marker
 augroup END
 " }}}
 
-" abbreviations           ------------ {{{
+" ----------------------------------------------------------------------------
+" 5. Abbreviations           {{{
+" ----------------------------------------------------------------------------
 iabbrev adn and
 iabbrev waht what
 iabbrev tehn then
@@ -284,3 +248,59 @@ iabbrev doesnt does not
 iabbrev youre you are
 " }}}
 
+" ----------------------------------------------------------------------------
+" 6. YouCompleteMe             {{{
+" ----------------------------------------------------------------------------
+" https://github.com/ycm-core/youcompleteme
+silent! packadd YouCompleteMe
+
+" Semantic support for C-family
+let g:ycm_clangd_binary_path = '/usr/bin/clangd'
+
+" Disable diagnostics in insert mode
+let g:ycm_update_diagnostics_in_insert_mode = 0
+
+let g:ycm_enable_inlay_hints = 1
+
+" Diagnostics to the right of the line, using virtual text
+" (options: 1 / 0 / 'virtual-text')
+let g:ycm_echo_current_diagnostics = 'virtual-text'
+
+" Show diagnostics in a popup when :YcmShowDetailedDiagnostic is invoked
+let g:ycm_show_detailed_diag_in_popup = 1
+
+" Error/warning coloring, matched to the tokyonight palette
+hi YcmErrorLine      guibg=#2d202a
+hi YcmErrorSection   guifg=#f7768e guibg=#2d202a
+hi YcmWarningLine    guibg=#2f2b1f
+hi YcmWarningSection guifg=#e0af68 guibg=#2f2b1f
+
+" Hover popup, top-right of the window, for languages YCM understands well
+augroup YCMCustom
+  autocmd!
+  autocmd FileType c,cpp,cuda,python let b:ycm_hover = {
+        \ 'command': 'GetDoc',
+        \ 'syntax': &filetype,
+        \ 'popup_params': {
+        \   'opacity': 90,
+        \   'pos': 'topright',
+        \   'line': 'cursor',
+        \   'col': 121,
+        \   'fixed': v:true,
+        \   'maxwidth': 80,
+        \ },
+        \ }
+augroup END
+
+nnoremap <localleader>hi <Plug>(YCMToggleInlayHints)
+nnoremap <localleader>ho <Plug>(YCMHover)
+nnoremap <localleader>hd :YcmShowDetailedDiagnostic<CR>
+nnoremap <localleader>gd :YcmCompleter GoToDefinition<CR>
+nnoremap <localleader>gr :YcmCompleter GoToReferences<CR>
+nnoremap <localleader>gi :YcmCompleter GoToImplementation<CR>
+nnoremap <localleader>fo :YcmCompleter Format<CR>
+nnoremap <localleader>fix :YcmCompleter FixIt<CR>
+" Trailing space is intentional: leaves the command line open for you to
+" type the new name after RefactorRename.
+nnoremap <localleader>rn :YcmCompleter RefactorRename 
+" }}}
