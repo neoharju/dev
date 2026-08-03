@@ -2,30 +2,88 @@ export XDG_CONFIG_HOME=$HOME/.config
 VIM="nvim"
 
 PERSONAL=$XDG_CONFIG_HOME/personal
-for i in `find -L $PERSONAL`; do
-    source $i
-done
+# Source every regular file under $PERSONAL, recursively, following
+# symlinks (so machine-specific overrides can be symlinked in).
+if [[ -d "$PERSONAL" ]]; then
+    for i in "${(0)$(find -L "$PERSONAL" -type f -print0 2>/dev/null)}"; do
+        # A NUL-terminated stream ends in a trailing NUL, which (0)-splitting
+        # turns into one empty trailing element -- skip it.
+        [[ -z "$i" ]] && continue
+        source "$i"
+    done
+    unset i
+fi
+
 
 ## fuzzy finder 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[[ -f "$HOME/.fzf.zsh" ]] && source "$HOME/.fzf.zsh"
 
-export GIT_EDITOR=$VIM
+export EDITOR="$VIM"
+export VISUAL="$VIM"
+export GIT_EDITOR="$VIM"
 export DEV_ENV_HOME="$HOME/personal/dev-env"
 
 addToPath() {
-    if [[ "$PATH" != *"$1"* ]]; then
-        export PATH=$PATH:$1
-    fi
+    [[ ":$PATH:" != *":$1:"* ]] && export PATH="$PATH:$1"
 }
 
 addToPathFront() {
-    if [[ "$PATH" != *"$1"* ]]; then
-        export PATH=$1:$PATH
-    fi
+    [[ ":$PATH:" != *":$1:"* ]] && export PATH="$1:$PATH"
 }
 
-addToPathFront $HOME/.local/scripts
-addToPathFront $HOME/.local/bin
-addToPathFront $HOME/.local/apps/
 
-addToPath $HOME/.local/scripts
+addToPathFront "$HOME/.local/scripts"
+addToPathFront "$HOME/.local/bin"
+addToPathFront "$HOME/.local/apps"
+
+addToPath "$HOME/.local/scripts"
+
+[[ -d /opt/cuda/bin ]] && addToPathFront "/opt/cuda/bin"
+
+# tmux panes against the same project instead of one shell per project.
+HISTSIZE=50000
+SAVEHIST=500000
+HISTFILE="$HOME/.zsh_history"
+setopt HIST_IGNORE_DUPS INC_APPEND_HISTORY SHARE_HISTORY
+
+# --- plugin manager: zinit (turbo-mode lazy load) -------------------------
+ZINIT_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/zinit/zinit.git"
+if [[ ! -d "$ZINIT_HOME" ]]; then
+    mkdir -p "$(dirname "$ZINIT_HOME")"
+    git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+fi
+source "${ZINIT_HOME}/zinit.zsh"
+
+zinit ice wait lucid
+zinit light zsh-users/zsh-autosuggestions
+
+zinit ice wait lucid atinit"zicompinit; zicdreplay"
+zinit light zdharma-continuum/fast-syntax-highlighting
+
+zinit ice wait lucid blockf
+zinit light zsh-users/zsh-completions
+
+# --- prompt / navigation / per-project env --------------------------------
+command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
+command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
+
+# --- perf-work helpers ------------------------------------------------------
+
+# core-pin a command for noise-free benchmarking: pin 3 ./a.out
+pin() {
+    local core=$1
+    shift
+    taskset -c "$core" "$@"
+}
+
+# perf stat with cache/branch counters pre-selected, instead of retyping
+# the -e list every time: pstat ./a.out
+pstat() {
+    perf stat -e cache-references,cache-misses,instructions,cycles,branch-instructions,branch-misses "$@"
+}
+
+# enable core dumps for the current shell and its children
+alias coredumps='ulimit -c unlimited'
+
+
