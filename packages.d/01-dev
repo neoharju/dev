@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# packages.d/dev -- core tooling + fonts
+#
+# Assumes HyDE is already installed (which installs paru etc)
+# TODO: there is overlap with packages that HyDE installs on purpose...
+set -euo pipefail
+
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+# shellcheck source=../lib/common.sh
+source "$script_dir/lib/common.sh"
+
+log_info "---- base dev ----"
+require_cmd paru
+
+# HyDE installs e.g. git base-devel starship, but left here incase I stop using
+# it 
+build_tools=(cmake git base-devel ninja curl)
+cli_tools=(fzf ripgrep btop bc bat fd eza git-delta zoxide direnv starship jq tmux)
+lang_toolchains=(go stylua lua luarocks npm)
+apps=(gimp)
+shell=(zsh)
+fonts=(woff2-font-awesome ttf-jetbrains-mono-nerd ttf-nerd-fonts-symbols)
+
+run_cmd paru -S --noconfirm --needed \
+	"${build_tools[@]}" "${cli_tools[@]}" "${lang_toolchains[@]}" "${apps[@]}" \
+    "${shell[@]}"	
+
+run_cmd luarocks install luacheck
+run_cmd go install github.com/air-verse/air@latest
+run_cmd paru -S --noconfim --needed "${fonts[@]}"
+
+
+# Im using HyDE some of these and other things will be installed by HyDE
+# See: https://github.com/HyDE-Project/HyDE/blob/master/Scripts/pkg_core.lst
+# 
+# paru -S waybar
+# paru -S hyprlock --noconfirm -needed
+# paru -S hyprpaper hyprshot
+# paru -Syu wlogout-git --noconfirm --needed
+# paru -S ffmpeg aalib
+# -- Turso's sqlite
+# curl -sSfL https://get.tur.so/install.sh | bash

@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# packages.d/HyDE -- install HyDE (https://github.com/HyDE-Project/HyDE), built
+# with -march=native since it's compiling on the box it'll run on.
+set -euo pipefail
+
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+# shellcheck source=../lib/common.sh
+source "$script_dir/lib/common.sh"
+# shellcheck source=../lib/optimize.sh
+source "$script_dir/lib/optimize.sh"
+
+log_info "----- HyDE -----"
+log_info "Installing git and base-devel requirements."
+run_cmd sudo pacman -S --needed git base-devel
+
+require_cmd git
+
+hyde_dir="$HOME/HyDE"
+
+if [[ -d "hyde_dir/.git" ]]; then
+	log_info "HyDE already cloned at $hyde_dir, pulling latest instead"
+	run_cmd git -C "$hyde_dir" pull --ff-only
+else
+	run_cmd git clone --depth 1 https://github.com/HyDE-Project/HyDE "$hyde_dir"
+fi
+
+install_script="$hyde_dir/Scripts/install.sh"
+if [[ "${DRY_RUN:-0}" != "1" ]]; then
+    [[ -x "$install_script" ]] || die "$install_script executable not found after clone"
+fi
+
+run_cmd bash "$install_script"
+
