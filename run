@@ -31,7 +31,7 @@
 
 set -euo pipefail
 
-script_dir=($cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=lib/common.sh
 source "$script_dir/lib/common.sh"
 
@@ -50,7 +50,7 @@ if [[ -z "${DEV_ENV:-}" ]]; then
     die "env var DEV_ENV needs to be present (e.g. DEV_ENV=\$(pwd) ./run)"
 fi
 
-filters=""
+filter=""
 list_only="0"
 skip_confirm="0"
 

@@ -33,8 +33,8 @@ fi
 
 log_info() { printf '%s[INFO ]%s %s\n' "$C_BLUE" "$C_RESET" "$*" >&2; } 
 log_warn() { printf '%s[WARN ]%s %s\n' "$C_YELLOW" "$C_RESET" "$*" >&2; } 
-log_info() { printf '%s[ERROR]%s %s\n' "$C_RED" "$C_RESET" "$*" >&2; } 
-log_info() { printf '%s[PASS ]%s %s\n' "$C_GREEN" "$C_RESET" "$*" >&2; } 
+log_error() { printf '%s[ERROR]%s %s\n' "$C_RED" "$C_RESET" "$*" >&2; } 
+log_ok() { printf '%s[ OK ]%s %s\n' "$C_GREEN" "$C_RESET" "$*" >&2; } 
 
 die() {
     log_error "$$*"
@@ -56,7 +56,7 @@ require_cmd() {
 # the command that would have run. Always logs before executing so failures
 # are easy to correlate with the command that caused them
 run_cmd() {
-    if [[ "$DRY_RUN"==1 ]]; then
+    if [[ "$DRY_RUN" == 1 ]]; then
         printf '%s[DRY_RUN]%s %s\n' "$C_YELLOW" "$C_RESET" "$(printf '%q ' "$@")" >&2
         return 0
     fi

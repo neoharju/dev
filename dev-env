@@ -16,7 +16,7 @@
 
 set -euo pipeline
 
-script_dir=$(cd -- "$dirname -- "${BASH_SOURCE[0]}")" && pwd)
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=lib/common.sh
 source "$script_dir/lib/common.sh"
 

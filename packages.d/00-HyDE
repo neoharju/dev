@@ -6,6 +6,7 @@ set -euo pipefail
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 # shellcheck source=../lib/common.sh
 source "$script_dir/lib/common.sh"
+
 # shellcheck source=../lib/optimize.sh
 source "$script_dir/lib/optimize.sh"
 
