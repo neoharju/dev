@@ -1,25 +1,53 @@
 #!/usr/bin/env bash
-
+# packages.d/vim -- build vim (huge feature set) from source
 # https://github.com/vim/vim/tags
 # vim is using fortify=1
+set -euo pipefail
 
-git clone https://github.com/vim/vim.git $HOME/personal/vim
-cd $HOME/personal/vim/src
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+# shellcheck source=../lib/common.sh
+source "$script_dir/lib/common.sh"
+# shellcheck source=../lib/optimize.sh
+source "$script_dir/lib/optimize.sh"
 
-sudo make clean
-sudo make uninstall
-sudo make distclean
-CFLAGS="-O3 -march=native -flto -pipe" \
-./configure \ 
-		--prefix=/usr/local \ 
-		--with-features=huge \ 
-		--enable-python3interp=yes \
-	    --disable-gui \  
-	    --enable-clipboard \ 
-		--enable-terminal \ 
-		--enable-cscope \ 
-		--enable-multibyte \  
-		--enable-gpm=yes
-make -j8
-sudo make install -j8
+personal_dir="$HOME/personal"
+vim_src="$personal_dir/vim"
+
+mkdir -p -- "$personal_dir"
+
+if [[ -d "$vim_src/.git" ]]; then
+    log_info "vim already cloned at $vim_src, pulling latest instead"
+    run_cmd git -C "$vim_src" pull --ff-only
+else
+    run_cmd git clone https://github.com/vim/vim.git "$vim_src"
+fi
+
+
+(
+    cd -- "$vim_src/src"
+
+    # Only clean/uninstall a previous build if one exists -- on a fresh
+    # clone there is no Makefile yet, and `make uninstall` on nothing
+    # used to hard-fail the original script before it ever reached
+    # ./configure.
+    if [[ -f Makefile ]]; then
+        run_cmd sudo make clean
+        run_cmd sudo make uninstall
+        run_cmd sudo make distclean
+    fi
+
+    run_cmd ./configure \
+        --prefix=/usr/local \
+        --with-features=huge \
+        --enable-python3interp=yes \
+        --disable-gui \
+        --enable-clipboard \
+        --enable-terminal \
+        --enable-cscope \
+        --enable-multibyte \
+        --enable-gpm=yes
+
+    run_cmd make "-j$(nproc)"
+    run_cmd sudo make install
+)
 
