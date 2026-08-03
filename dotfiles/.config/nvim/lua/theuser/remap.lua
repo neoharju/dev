@@ -26,8 +26,8 @@ map("n", "N", "Nzzzv")
 map("n", "Y", "y$")
 
 -- quick fix navigation
-map("n", "<C-k>", "<cmd>cnext<CR>zz")
-map("n", "<C-j>", "<cmd>cprev<CR>zz")
+map("n", "]q", "<cmd>cnext<CR>zz")
+map("n", "[q", "<cmd>cprev<CR>zz")
 
 -- join line and keep cursor at place with mark
 map("n", "J", "mzJ`z", { desc = "Join line" })

@@ -1,7 +1,7 @@
 return {
 	"nvim-telescope/telescope.nvim",
 
-	tag = "0.1.8",
+	tag = "0.2.1",
 
 	dependencies = {
 		"nvim-lua/plenary.nvim",
@@ -11,7 +11,7 @@ return {
 		require("telescope").setup({})
 
 		local builtin = require("telescope.builtin")
-		vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Find files" })
+		vim.keymap.set("n", "<leader>pf", builtin.find_files, { desc = "Find files" })
 		vim.keymap.set("n", "<C-p>", builtin.git_files, { desc = "Find Git files" })
 		vim.keymap.set("n", "<leader>pws", function()
 			local word = vim.fn.expand("<cword>")

@@ -40,6 +40,7 @@ return {
 				"gopls",
 				"pyright",
 				"clangd",
+				"ruff",
 			},
 			handlers = {
 				-- Default handler
@@ -116,6 +117,14 @@ return {
 						filetypes = { "c", "cpp", "objc", "objcpp", "cuda" },
 					})
 				end,
+				["ruff"] = function()
+					require("lspconfig").ruff.setup({
+						capabilities = capabilities,
+						on_attach = function(client)
+							client.server_capabilities_hoverProvider = false
+						end,
+					})
+				end,
 
 				["gopls"] = function()
 					require("lspconfig").gopls.setup({
@@ -133,7 +142,15 @@ return {
 				end,
 			},
 		})
-
+		-- Native inlay hints for any server supporting them
+		vim.api.nvim_create_autocmd("LspAttach", {
+			callback = function(args)
+				local client = vim.lsp_get_client_by_id(args.data.client_id)
+				if client and client:supports_method("textDocument/inlayHint") then
+					vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
+				end
+			end,
+		})
 		local cmp_select = { behavior = cmp.SelectBehavior.Select }
 		cmp.setup({
 			snippet = {
