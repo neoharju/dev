@@ -2,6 +2,9 @@ vim.g.mapleader = " "
 
 local map = vim.keymap.set
 
+-- esc insert with jk
+map("i", "jk", "<Esc>")
+
 -- moving lines/blocks in visual mode with indenting.
 map("v", "J", ":m '>+1<CR>gv=gv")
 map("v", "K", ":m '<-2<CR>gv=gv")
