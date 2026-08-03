@@ -1,15 +1,50 @@
 # dev
+Personal linux dev-machine bootstrap: install packages, then
+dotfiles/configs. No guarantees/warranties/liabilities/responsibilities.
 
-personal dev stuff, no guarantees/warranties/liabilities/responsibilities
+TODO: check-versions script, default git conf, templates(?)
 
-### Test
+## Flags
+
+Every entrypoint (`run`, `dev-env`, and each `packages.d/*` script)
+understands:
+
+- `--dry` -- print what would happen, touch nothing.
+- `-h` / `--help` -- usage (on `run` and `dev-env`).
+
+## Test
+
 ```sh
 export DEV_ENV=$(pwd)
 ./run --dry
-./dev-env-og --dry
+./dev-env --dry
 ```
 
-### Test run scripts with Docker
+## Install packages (HyDE, cpp-tools, tmux, vim, neovim, ...)
+
+```sh
+export DEV_ENV=$(pwd)
+
+# one target
+./run dev
+
+# everything under packages.d/
+./run
+```
+
+## Install dotfiles/configs
+
+```sh
+export DEV_ENV=$(pwd)
+
+# copy (default)
+./dev-env
+
+# symlink instead, so edits under $HOME follow the repo
+./dev-env --link
+```
+
+## Test run scripts with Docker
 ```sh
 docker build -t archenjoyer .
 docker run --rm -it --tmpfs /tmp archenjoyer sh
@@ -20,22 +55,12 @@ git clone https://github.com/neoharju/dev.git
 cd dev
 export DEV_ENV=$(pwd)
 ./run
+./dev-env
 ```
 
-### Install packages; e.g. git, base-devel...
-```sh
-# for a specific install e.g.
-./run dev
-# all
-./run
-```
-
-### Install keybinds/configs/profiles/neovim lsps...
-```sh
-# for a specific install e.g.
-./dev-env-og neovim
-# all
-./dev-env-og
+### Check bash scripts for basic functioning
+```bsh
+bash shellchecker
 ```
 
 ### Ref
