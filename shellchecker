@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Shellchecker
+#
+# Checks the shell scripts; hardcoded
+#
+# Usage:
+#	bash shellchecker
+
+set -euo pipefail
+
+install_scripts=(
+	"dev-env"
+	"run"
+	"lib/common.sh"
+	"lib/optimize.sh"
+)
+packaged_install_scripts=(
+    "00-HyDE"
+	"01-dev"
+	"02-cpp-toolchain"
+	"03-cuda"
+	"04-perf"
+	"neovim"
+	"vim"
+)
+
+for script in "${install_scripts[@]}"; do
+	echo "Checking $script..."
+    if ! shellcheck -x "$script"; then
+		echo
+        echo "ERROR: shellcheck failed for $script" >&2
+        exit 1
+	fi
+done
+
+echo 
+pushd packages.d
+echo
+
+for script in "${packaged_install_scripts[@]}"; do
+	echo "Checking $script..."
+    if ! shellcheck -x "$script"; then
+		echo
+        echo "ERROR: shellcheck failed for $script" >&2
+        exit 1
+	fi
+done
+echo
+popd
