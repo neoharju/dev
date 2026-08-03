@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# packages.d/perf profiling and debug stack
+set -euo pipefail
+
+script_dir=$(cd -- "$(dirname --"${BASH_SOURCE[0]}")/.." && pwd)
+# shellcheck source=../lib/common.sh
+source "$script_dir/lib/common.sh"
+
+log_info "---- perf ----"
+require_cmd paru sudo
+
+debuggers=(gdb valgrind heaptrack strace ltrace)
+profilers=(perf hyperfine)
+aur_only=(likwid)
+
+run_cmd paru -S --noconfirm --needed "${debuggers[@]}" "${profilers[@]}" "${aur_only[@]}"
+
