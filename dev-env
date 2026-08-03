@@ -1,75 +1,177 @@
-#!/usr/bin/env bash
-dry_run="0"
+#!/usr/bin/bash
+# dev-env
+# 
+# Installs this repo's dotfiles/configs into $HOME
+# See `run` script for software installation.
+#
+#   dotfiles/.config/<dir>/...  -> $XDG_CONFIG_HOME/<dir>/  (recursive, per dir)
+#   dotfiles/.local/<dir>/...   -> $HOME/.local/<dir>/       (recursive, per dir)
+#   dotfiles/home/<file>        -> $HOME/<file>              (one per file)
+#
+# Usage:
+#   DEV_ENV=$(pwd) ./dev-env [--dry] [--link]
+#
+#   --dry    print what would happen without touching the filesystem.
+#   --link   symlink instead of copy (edits under $HOME follow the repo).
 
-if [ -z "$XDG_CONFIG_HOME" ]; then
-    echo "no xdg config home"
-    echo "using ~/.config"
-    XDG_CONFIG_HOME=$HOME/.config
-fi
+set -euo pipeline
 
-if [ -z "$DEV_ENV" ]; then
-    echo "env var DEV_ENV needs to be present"
-#    exit 1
-fi
+script_dir=$(cd -- "$dirname -- "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=lib/common.sh
+source "$script_dir/lib/common.sh"
 
-if [[ $1 == "--dry" ]]; then
-    dry_run="1"
-fi
+usage() {
+    cat <<'EOF'
+Usage: DEV_ENV=$(pwd) ./dev-env [--dry] [--link]
 
-log() {
-   if [[ $dry == "1" ]]; then
-       echo "[DRY_RUN]: $1"
+  --dry    print what would happen without touching the filesystem.
+  --link   symlink instead of copy (edits under $HOME follow the repo).
+EOF
+}
+
+# default link mode: false
+link_mode="0"
+
+while(($# > 0)); do
+    case "$1" in
+        --dry) DRY_RUN="1" ;;
+        --link) link_mode="1" ;;
+        -h | --help)
+            usage
+            exit 0
+            ;;
+        *)
+            die "unknown argument: $1 (see --help)"
+            ;;
+    esac
+    shift
+done
+
+# DEV_ENV defaults to script's own directory for configs if not declared
+: "${DEV_ENV:="$script_dir"}"
+: "${XDG_CONFIG_HOME:="$HOME/.config"}"
+
+log_info "DEV_ENV=$DEV_ENV"
+log_info "XDG_CONFIG_HOME=$XDG_CONFIG_HOME"
+
+# Basic removal validation for slightly safer rm
+safe_rm() {
+    local target=$1
+
+    [[ -n "$target" ]] || die "safe_rm: empty path"
+
+    if [[ -e "$target" ]]; then
+        target=$(realpath "$target")
+    fi
+
+    case "$target" in
+        "$XDG_CONFIG_HOME"/*/*)
+            die "Refusing nested .config path"
+            ;;
+        "$XDG_CONFIG_HOME"/*)
+            ;;
+        "$HOME/.local"/*/*/*)
+            die "Refusing deeply nested .local path"
+            ;;
+        "$HOME/.local"/*)
+            ;;
+        "$HOME"/.*/*)
+            die "Refusing nested dotfile path"
+            ;;
+        "$HOME"/.*)
+            ;;
+        *)
+            die "Refusing unmanaged path"
+            ;;
+    esac
+
+    run_cmd rm -rf -- "$target"
+}
+
+# install_entry SRC DEST
+# Replaces DEST with SRC, as a copy or a symlink depending on link_mode.
+# Removing the destination first (rather than e.g. `cp -r` over it) keeps
+# behaviour identical whether DEST is currently a file, a directory, a
+# symlink, or missing entirely.
+install_entry() {
+    local src=$1 dest=$2
+
+    [[ -e "$src" ]] || die "source does not exist: $src"
+    
+    safe_rm "$dest"
+    mkdir -p -- "$(dirname -- "$dest")"
+
+    if [[ "$link_mode" == "1" ]]; then
+        run_cmd ln -s -- "$src" "$dest"
     else
-        echo "$1"
+        run_cmd cp -r -- "$src" "$dest"
     fi
 }
 
-log "env: $DEV_ENV"
+# install_subdirs SRC_ROOT DEST_ROOT
+# Installs every direct subdirectory of SRC_ROOT into DEST_ROOT, e.g.
+# .config/nvim -> $XDG_CONFIG_HOME/nvim. Skipped entirely (with a log
+# line, not an error) if SRC_ROOT doesn't exist, so an empty .local/ in
+# the repo doesn't break the run.
+install_subdirs() {
+    local src_root=$1
+    local dest_root=$2
 
-execute() {
-    # log "execute $@"
-    if [[ $dry_run == "1" ]] ; then
-        return
+    if [[ ! -d "$src_root" ]]; then
+        log_info "skipping $src_root (missing)"
+        return 0
     fi
-    # else execute everything
-    "$@"
+
+    shopt -s nullglob
+
+    local dir
+    for dir in "$src_root"/*/; do
+        install_entry "$dir" "$dest_root/$(basename "$dir")"
+    done
+
+    shopt -u nullglob
+
 }
 
-update_files() {
-    log "copying over files from: $1"
-    pushd $1 &> /dev/null
-    {
-        configs=$(find . -mindepth 1 -maxdepth 1 -type d)
-        for conf in $configs; do
-            # `${2%/}`: Removes any trailing slash from the second argument
-            # `${c#./}`: Removes the leading `./` from the directory name
-            directory=${2%/}/${conf#./}
-            log "    removing: rm -rf $directory"
+# install_files SRC_ROOT DEST_ROOT
+# Installs every direct file of SRC_ROOT into DEST_ROOT, e.g.
+# dotfiles/home/.zsh_profile -> $HOME/.zsh_profile.
+install_files() {
+    local src_root=$1
+    local dest_root=$1
+    if [[ ! -d "$src_root" ]]; then
+        log_info "skipping $src_root (missing)"
+        return 0
+    fi
+    
+    shopt -s nullglob
 
-            execute  rm - rf $directory
-            log "    copying env: cp $conf $2"
-            execute  cp -r ./$conf $2
-        done
+    local file
+    for file in "$src_root"/*; do
+        [[ -f "$file" ]] || continue
+        install_entry "$file" "$dest_root/$(basename "$file")"
+    done
 
-    }
-    popd &> /dev/null
+    shopt -u nullglob
 }
 
-copy() {
-    log "removing: $2"
-    execute rm $2
-    log "copying: $1 to $2"
-    execute cp $1 $2
-}
+install_subdirs "$DEV_ENV/dotfiles/.config" "$XDG_CONFIG_HOME"
+install_subdirs "$DEV_ENV/dotfiles/.local" "$HOME/.local"
+install_files "$DEV_ENV/dotfiles/home" "$HOME"
 
-update_files $DEV_ENV/env/.config $XDG_CONFIG_HOME
-update_files $DEV_ENV/env/.local $HOME/.local
+############
+## NOTE:  gitconfig install removed
+############
 
-copy $DEV_ENV/tmux-sessionizer/tmux-sessionizer $HOME/.local/scripts/tmux-sessionizer
-copy $DEV_ENV/env/.zsh_profile $HOME/.zsh_profile
-copy $DEV_ENV/env/.zshrc $HOME/.zshrc
-copy $DEV_ENV/env/.xprofile $HOME/.xprofile
-copy $DEV_ENV/env/.tmux-sessionizer $HOME/.tmux-sessionizer
-copy $DEV_ENV/dev-env $HOME/.local/scripts/dev-env
+# Reload Hyprland only if it's actually the running compositor; without
+# this check the script hard-fails under set -e on any non-Hyprland
+# machine (e.g. the Docker test target), which used to be silently masked
+# by the old script's lack of error handling.
+if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] && command -v hyprctl >/dev/null 2>&1; then
+    run_cmd hyprctl reload
+else
+    log_info "Hyprland not detected, skipping hyprctl reload"
+fi
 
-hyprctl reload
+log_ok "dotfiles installed"
+
