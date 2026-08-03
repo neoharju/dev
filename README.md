@@ -2,7 +2,7 @@
 Personal linux dev-machine bootstrap: install packages, then
 dotfiles/configs. No guarantees/warranties/liabilities/responsibilities.
 
-TODO: check-versions script, default git conf, templates(?)
+TODO: check-versions script, default git conf, templates(?), debian version
 
 ## Flags
 
