@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# packages.d/cpp-toolchain
+#
+# clang/LLVM toolchain
+# mold (faster linker)
+# sscache (compiler cache with nvcc support)
+
+set -euo pipeline
+
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]})")/.." && pwd)
+# shellcheck source=../lib/common.sh
+source "$script_dir"/lib/common.sh
+
+log_info "---- cpp-toolchain ----"
+require_cmd paru
+
+compiler=(clang llvm lld lldb)
+build_speed=(mold sccache)
+
+run_cmd paru -S --noconfirm --needed "${compiler[@]}" "${build_speed[@]}"
+
+# example usage:
+#   export LDFLAGS="-fuse-d=mold"
+#   export CC="sccache g++" 
+    export CXX="sccache g++"
+#
+# lets sccache see through nvcc to the host compiler
+#   export CUDAHOSTCXX="sccache g++"
