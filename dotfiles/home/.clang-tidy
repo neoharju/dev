@@ -1,0 +1,17 @@
+# dotfiles/home/.clang-tidy
+# Installed to $HOME/.clang-tidy by ./dev-env. Picked up automatically by
+# clangd's --clang-tidy flag (see .config/nvim/lua/theuser/lazy/lsp.lua)
+# for files with no closer, project-level .clang-tidy.
+Checks: >
+  -*,
+  bugprone-*,
+  performance-*,
+  modernize-*,
+  cppcoreguidelines-slicing,
+  cppcoreguidelines-narrowing-conversions,
+  clang-analyzer-*,
+  -modernize-use-trailing-return-type
+
+WarningsAsErrors: ''
+FormatStyle: file
+
