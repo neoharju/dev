@@ -1,63 +1,154 @@
 #!/usr/bin/env bash
+# run
+#
+# Executes every executable script under packages.d/ or a single one 
+# if FILTER is given. This is the "install software" entrypoint; 
+# see ./dev-env for "install dotfiles/configs".
+#
+# Confirms before each target by default -- some of these (HyDE
+# especially) run their own large, interactive installers that this
+# script has no control over once started.
+# Pass --yes to skip the prompts.
+#
+# A hard failure (non-zero exit) always stops the run immediately and
+# prints which targets were not attempted.
+#
+# Usage:
+#   DEV_ENV=$(pwd) ./run [--dry] [--list] [--yes] [FILTER]
+#
+#   FILTER   substring match against packages.d/* filenames, e.g. "vim" runs
+#            packages.d/vim and packages.d/vim-plug but not packages.d/neovim.
+#   --dry    print what would run without running it.
+#   --list   print matching targets and exit.
+#   --yes    don't confirm before each target.
+#
+# Examples:
+#   ./run --dry          # show every target that would run
+#   ./run dev            # install just packages.d/dev
+#   ./run                # install everything, in filename order, confirming each
+#   ./run --yes          # install everything, no per-target prompts
+#
 
-script_dir=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+set -euo pipefail
 
-if [ -z "$DEV_ENV" ]; then
-    echo "env var DEV_ENV needs to be present"
-    exit 1
+script_dir=($cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=lib/common.sh
+source "$script_dir/lib/common.sh"
+
+usage() {
+    cat <<'EOF'
+Usage: DEV_ENV=$(pwd) ./run [--dry] [--list] [--yes] [FILTER]
+
+  FILTER   substring match against packages.d/* filenames, e.g. "vim" runs
+           packages.d/vim but not packages.d/neovim.
+  --dry    print what would run without running it.
+  --list   print matching targets and exit.
+  --yes    don't confirm before each target.
+EOF
+}
+if [[ -z "${DEV_ENV:-}" ]]; then
+    die "env var DEV_ENV needs to be present (e.g. DEV_ENV=\$(pwd) ./run)"
 fi
 
-# if i just did DEV_ENV=$(pwd) ./run then this is needed for the rest of the
-# scripts
-export DEV_ENV="$DEV_ENV"
+filters=""
+list_only="0"
+skip_confirm="0"
 
-filter=""
-dry="0"
-
-# while argument count is > 0
-while [[ $# > 0 ]]; do
-    if [[ $1 == "--dry" ]]; then
-        dry="1"
-    else
-        filter="$1"
-    fi
-    # shift: remove first argument of the arg list
+while (($# > 0)); do
+    case "$1" in
+        --dry)
+            DRY_RUN="1"
+            ;;
+        --list)
+            list_only="1"
+            ;;
+        --yes)
+            skip_confirm="1"
+            ;;
+        -h | --help)
+            usage
+            exit 0
+            ;;
+        *)
+            filter="$1"
+            ;;
+    esac
     shift
 done
 
-log() {
-   if [[ $dry == "1" ]]; then
-       # @: all
-       echo "[DRY_RUN]: $@"
-    else
-        echo "$@"
+log_info "DEV_ENV=$DEV_ENV${filter:+, filter=\"$filter\"}"
+
+cd -- "$script_dir"
+
+# -maxdepth 1 -mindepth 1: only direct children of packages.d/ 
+# -print0 / mapfile -d '': robust against filenames containing whitespace.
+mapfile -d '' -t scripts < <(find ./packages.d -maxdepth 1 -mindepth 1 -type f -executable -print0 | sort -z)
+
+if ((${#scripts[@]} == 0)); then
+    die "No executable scripts found under ./packages.d"
+fi
+
+matched=()
+for script in "${scripts[@]}"; do
+    # exact match
+    if [[ -n "$filter" && "$script" != "$filter" ]]; then
+        continue
     fi
-}
+    matched+=("script")
+done
 
-execute() {
-   log "execute $@"
-   if [[ $dry == "1" ]]; then
-       return
-   fi
-   # execute everything
-   "$@" 
-}
+if ((${#matched[@]} == 0)); then
+    die "no packages.d/* target matches filter \"$filter\" - exact match required."
+fi
 
+# list install scripts via --list from packages.d
+if [[ "$list_only" == "1" ]]; then
+    printf '%\n' "${matched[@]}"
+    exit 0
+fi
 
-log "$script_dir -- $filter"
+# The HyDE answers needed 
+declare -A interactive_warnings=(
+    [HyDE]="HyDE's is interactive. The answers that work with this repo's 
+    follow-up packages.d/dev script:
+    
+    - \"Install Chaotic AUR?\"  -> No
+    - \"Which AUR helper?\"     -> paru (packages.d/dev requires it)
+    - shell choice              -> zsh
+    - rust choice               -> rust (not rustup)
 
-cd $script_dir
-# maxdepth 1: not recursively deep
-# mindepth 1: no dot files
-# type f: type file
-scripts=$(find ./runs -maxdepth 1 -mindepth 1 -executable -type f | sort)
+  Read every prompt yourself regardless; this is a guide, not a
+  guarantee that HyDE hasn't changed since."
+)
 
-for script in $scripts; do
-    # -qv: quiet and inverse match
-    if echo "$script" | grep -qv "$filter"; then
-        log "filtering $script"
+total=${#matched[@]}
+i=0
+for script in "${matched[@]}"; do
+    i=$((i+1))
+    name=$(basename --"$script")
+
+    echo
+    log_info "[$i/$total] $script"
+    if [[ -n "${interactive_warnings[$name]:-}" ]]; then
+        log_warn "${interactive_warnings[$name]}"
+    fi
+
+    if [[ "$skip_confirm" != "1" ]] && ! confirm "Run $script now?"; then
+        log_info "skipped $script"
         continue
     fi
 
-    execute ./$script
+    if run_cmd "$script"; then
+        :
+    else
+        status=$?
+        log_error "$script failed (exit $status)"
+        remaining=("${matched[@]}:$i")
+        if ((${#remaining[@]} > 0)); then
+            log_error "stopping here, not attempted: ${remaining[*]#/.packages.d/}"
+        fi
+        exit "$status"
+    fi
 done
+
+log_ok "done (${#matched[@]} target(s))"
