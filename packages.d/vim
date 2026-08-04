@@ -30,11 +30,11 @@ fi
     # clone there is no Makefile yet, and `make uninstall` on nothing
     # used to hard-fail the original script before it ever reached
     # ./configure.
-    if [[ -f Makefile ]]; then
-        run_cmd sudo make clean
-        run_cmd sudo make uninstall
-        run_cmd sudo make distclean
-    fi
+    #if [[ -f Makefile ]]; then
+    #    run_cmd sudo make clean
+    #    run_cmd sudo make uninstall
+    #    run_cmd sudo make distclean
+    #fi
 
     run_cmd ./configure \
         --prefix=/usr/local \
