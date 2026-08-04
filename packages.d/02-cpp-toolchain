@@ -5,9 +5,9 @@
 # mold (faster linker)
 # sscache (compiler cache with nvcc support)
 
-set -euo pipeline
+set -euo pipefail
 
-script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]})")/.." && pwd)
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 # shellcheck source=../lib/common.sh
 source "$script_dir"/lib/common.sh
 
@@ -22,7 +22,7 @@ run_cmd paru -S --noconfirm --needed "${compiler[@]}" "${build_speed[@]}"
 # example usage:
 #   export LDFLAGS="-fuse-d=mold"
 #   export CC="sccache g++" 
-    export CXX="sccache g++"
+#   export CXX="sccache g++"
 #
 # lets sccache see through nvcc to the host compiler
 #   export CUDAHOSTCXX="sccache g++"
