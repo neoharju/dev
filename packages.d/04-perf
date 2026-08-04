@@ -11,7 +11,8 @@ require_cmd paru sudo
 
 debuggers=(gdb valgrind heaptrack strace ltrace)
 profilers=(perf hyperfine)
+hardware_awareness=(numactl hwloc turbostat)
 aur_only=(likwid)
 
-run_cmd paru -S --noconfirm --needed "${debuggers[@]}" "${profilers[@]}" "${aur_only[@]}"
+run_cmd paru -S --noconfirm --needed "${debuggers[@]}" "${profilers[@]}" "${hardware_awareness[@]}" "${aur_only[@]}"
 
