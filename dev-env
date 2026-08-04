@@ -14,7 +14,7 @@
 #   --dry    print what would happen without touching the filesystem.
 #   --link   symlink instead of copy (edits under $HOME follow the repo).
 
-set -euo pipeline
+set -euo pipefail
 
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=lib/common.sh
