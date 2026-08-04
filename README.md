@@ -2,6 +2,9 @@
 Personal linux dev-machine bootstrap: install packages, then
 dotfiles/configs. No guarantees/warranties/liabilities/responsibilities.
 
+WARN: HyDE install is semi-broken right now and requires shenanigans, so the
+install scripts wont work directly right now until the issues are fixed.
+
 TODO: check-versions script, default git conf, templates(?), debian version
 
 ## Flags
