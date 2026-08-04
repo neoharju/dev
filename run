@@ -16,8 +16,8 @@
 # Usage:
 #   DEV_ENV=$(pwd) ./run [--dry] [--list] [--yes] [FILTER]
 #
-#   FILTER   substring match against packages.d/* filenames, e.g. "vim" runs
-#            packages.d/vim and packages.d/vim-plug but not packages.d/neovim.
+#   FILTER   Exact match against packages.d/* filenames, e.g. "vim" runs
+#            packages.d/vim 
 #   --dry    print what would run without running it.
 #   --list   print matching targets and exit.
 #   --yes    don't confirm before each target.
@@ -39,7 +39,7 @@ usage() {
     cat <<'EOF'
 Usage: DEV_ENV=$(pwd) ./run [--dry] [--list] [--yes] [FILTER]
 
-  FILTER   substring match against packages.d/* filenames, e.g. "vim" runs
+  FILTER   Exact match against packages.d/* filenames, e.g. "vim" runs
            packages.d/vim but not packages.d/neovim.
   --dry    print what would run without running it.
   --list   print matching targets and exit.
