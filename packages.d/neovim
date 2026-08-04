@@ -19,16 +19,25 @@ mkdir -p -- "$personal_dir"
 
 if [[ -d "$nvim_src/.git" ]]; then
 	log_info "neovim already cloned at $nvim_src, pulling latest instead"
-	run cmd git -C "$nvim_src" pull --ff-only
+	if  confirm "Clean previous neovim build? "; then
+		(
+			cd -- "$nvim_src"
+			run_cmd sudo make clean
+			run_cmd sudo make distclean
+		)
+	fi
+	run_cmd git -C "$nvim_src" pull --ff-only
 else
-	run_cmg git clong -b stable https://github.com/neovim/neovim.git "$nvim_src"
+	run_cmd git clone -b master https://github.com/neovim/neovim.git "$nvim_src"
 fi
+
 
 (
 	cd -- "$nvim_src"
 	run_cmd make CMAKE_BUILD_TYPE=Release
 	run_cmd sudo make install
 )
+
 
 if [[ -d "$plenary_src/.git" ]]; then
 	log_info "plenary.nvim already cloned at $plenary_src, pulling latest instead"
