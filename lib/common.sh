@@ -37,7 +37,7 @@ log_error() { printf '%s[ERROR]%s %s\n' "$C_RED" "$C_RESET" "$*" >&2; }
 log_ok() { printf '%s[ OK ]%s %s\n' "$C_GREEN" "$C_RESET" "$*" >&2; } 
 
 die() {
-    log_error "$$*"
+    log_error "$*"
     exit 1
 }
 

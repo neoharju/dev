@@ -9,41 +9,26 @@
 set -euo pipefail
 
 install_scripts=(
+	"shellchecker"
 	"dev-env"
 	"run"
 	"lib/common.sh"
 	"lib/optimize.sh"
-)
-packaged_install_scripts=(
-    "00-HyDE"
-	"01-dev"
-	"02-cpp-toolchain"
-	"03-cuda"
-	"04-perf"
-	"neovim"
-	"vim"
+    "packages.d/00-HyDE"
+	"packages.d/01-dev"
+	"packages.d/02-cpp-toolchain"
+	"packages.d/03-cuda"
+	"packages.d/04-perf"
+	"packages.d/neovim"
+	"packages.d/vim"
 )
 
 for script in "${install_scripts[@]}"; do
 	echo "Checking $script..."
-    if ! shellcheck -x "$script"; then
+    if ! shellcheck -x -P lib -P . -S style "$script"; then
 		echo
         echo "ERROR: shellcheck failed for $script" >&2
         exit 1
 	fi
 done
 
-echo 
-pushd packages.d
-echo
-
-for script in "${packaged_install_scripts[@]}"; do
-	echo "Checking $script..."
-    if ! shellcheck -x "$script"; then
-		echo
-        echo "ERROR: shellcheck failed for $script" >&2
-        exit 1
-	fi
-done
-echo
-popd
