@@ -25,9 +25,10 @@ run_cmd paru -S --noconfirm --needed \
 	"${build_tools[@]}" "${cli_tools[@]}" "${lang_toolchains[@]}" "${apps[@]}" \
     "${shell[@]}"	
 
-run_cmd luarocks install luacheck
+# TODO: fix luacheck install
+#run_cmd luarocks install luacheck
 run_cmd go install github.com/air-verse/air@latest
-run_cmd paru -S --noconfim --needed "${fonts[@]}"
+run_cmd paru -S --noconfirm --needed "${fonts[@]}"
 
 
 # Im using HyDE some of these and other things will be installed by HyDE
