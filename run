@@ -114,8 +114,8 @@ declare -A interactive_warnings=(
     
     - \"Install Chaotic AUR?\"  -> No
     - \"Which AUR helper?\"     -> paru (packages.d/dev requires it)
-    - shell choice              -> zsh
-    - rust choice               -> rust (not rustup)
+    - Shell choice            -> zsh
+    - Rust choice             -> rust (not rustup)
 
   Read every prompt yourself regardless; this is a guide, not a
   guarantee that HyDE hasn't changed since."
@@ -126,11 +126,12 @@ i=0
 for script in "${matched[@]}"; do
     i=$((i+1))
     name=$(basename -- "$script")
+    lookup_name="${name#[0-9][0-9]-}"
 
     echo
     log_info "[$i/$total] $script"
-    if [[ -n "${interactive_warnings[$name]:-}" ]]; then
-        log_warn "${interactive_warnings[$name]}"
+    if [[ -n "${interactive_warnings[$lookup_name]:-}" ]]; then
+        log_warn "${interactive_warnings[$lookup_name]}"
     fi
 
     if [[ "$skip_confirm" != "1" ]] && ! confirm "Run $script now?"; then
