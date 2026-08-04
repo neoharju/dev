@@ -10,5 +10,5 @@ log_info "---- intel-tools ----"
 require_cmd paru
 
 run_cmd paru -S --noconfirm --needed intel-oneapi-toolkit
-# TODO: check this
+run_cmd . /opt/intel/oneapi/setvars.sh
 log_info "New shell should source /opt/intel/oneapi/setvars.sh"
