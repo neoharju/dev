@@ -90,8 +90,12 @@ fi
 
 matched=()
 for script in "${scripts[@]}"; do
-    # exact match
-    if [[ -n "$filter" && "$script" != "$filter" ]]; then
+	name=$(basename -- "$script")
+    lookup_name="${name#[0-9][0-9]-}"
+    # exact match on basename without prefix nums
+    if [[ -n "$filter" && 
+        "$lookup_name" != "$filter" &&
+        "$name" != "$filter" ]]; then
         continue
     fi
     matched+=("$script")
