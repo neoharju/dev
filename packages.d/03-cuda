@@ -10,9 +10,8 @@ source "$script_dir/lib/common.sh"
 source "$script_dir/lib/optimize.sh"
 
 log_info "---- cuda ----"
-require_cmd paru
 
-run_cmd paru -S --noconfirm --needed cuda cudnn nsight-systems nsight-compute
+run_cmd sudo pacman -S --noconfirm --needed cuda cudnn nsight-systems nsight-compute
 
 log_info "nvcc/cuda-gdb available at /opt/cuda/bin once a new shell picks up PATH"
 log_info "nsys/ncu available directly on PATH (/usr/bin)"
