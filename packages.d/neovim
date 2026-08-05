@@ -28,7 +28,7 @@ if [[ -d "$nvim_src/.git" ]]; then
 	fi
 	run_cmd git -C "$nvim_src" pull --ff-only
 else
-	run_cmd git clone -b master https://github.com/neovim/neovim.git "$nvim_src"
+	run_cmd git clone --depth 1 -b master https://github.com/neovim/neovim.git "$nvim_src"
 fi
 
 
