@@ -10,7 +10,7 @@ script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 source "$script_dir/lib/common.sh"
 
 log_info "Updating system..."
-run_cmd sudo pacman -Syu
+run_cmd sudo pacman -Syu --noconfirm --needed
 
 log_info "---- base dev ----"
 
