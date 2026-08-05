@@ -14,7 +14,8 @@ run_cmd mkdir -p "$HOME/personal/rusty"
     cd -- "$HOME/personal/rusty"
     run_cmd mkdir -p "$HOME/.cargo/tmp"
 
-    TMPDIR="$HOME/.cargo/tmp" run_cmd curl --proto '=https' --tlsv1.2 -sSf \
+    export TMPDIR="$HOME/.cargo/tmp" 
+	run_cmd curl --proto '=https' --tlsv1.2 -sSf \
 		https://sh.rustup.rs | sh -s -- -y --profile default --default-toolchain stable
 )
 run_cmd rm -Rf -- "$HOME/.cargo/tmp/"
