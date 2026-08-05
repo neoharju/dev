@@ -12,12 +12,11 @@ script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 source "$script_dir"/lib/common.sh
 
 log_info "---- cpp-toolchain ----"
-require_cmd paru
 
 compiler=(clang llvm lld lldb)
 build_speed=(mold sccache)
 
-run_cmd paru -S --noconfirm --needed "${compiler[@]}" "${build_speed[@]}"
+run_cmd sudo pacman -S --noconfirm --needed "${compiler[@]}" "${build_speed[@]}"
 
 # example usage:
 #   export LDFLAGS="-fuse-d=mold"
