@@ -9,6 +9,9 @@ script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 # shellcheck source=../lib/common.sh
 source "$script_dir/lib/common.sh"
 
+log_info "Updating system..."
+run_cmd sudo pacman -Syu
+
 log_info "---- base dev ----"
 
 # HyDE installs e.g. git base-devel starship, but left here incase I stop using
