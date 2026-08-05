@@ -16,19 +16,19 @@ require_cmd paru
 # it 
 build_tools=(cmake git base-devel ninja curl)
 cli_tools=(fzf ripgrep btop bc bat fd eza git-delta zoxide direnv starship jq tmux)
-lang_toolchains=(go stylua lua luarocks npm python-debugpy)
+lang_toolchains=(go stylua lua luarocks npm python-debugpy rust)
 apps=(gimp)
 shell=(zsh)
 fonts=(woff2-font-awesome ttf-jetbrains-mono-nerd ttf-nerd-fonts-symbols)
 
-run_cmd paru -S --noconfirm --needed \
+run_cmd sudo pacman -S --noconfirm --needed \
 	"${build_tools[@]}" "${cli_tools[@]}" "${lang_toolchains[@]}" "${apps[@]}" \
     "${shell[@]}"	
 
 # TODO: fix luacheck install
 #run_cmd luarocks install luacheck
 run_cmd go install github.com/air-verse/air@latest
-run_cmd paru -S --noconfirm --needed "${fonts[@]}"
+run_cmd sudo pacman -S --noconfirm --needed "${fonts[@]}"
 
 
 # Im using HyDE some of these and other things will be installed by HyDE
