@@ -7,12 +7,10 @@ script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 source "$script_dir/lib/common.sh"
 
 log_info "---- perf ----"
-require_cmd paru sudo
 
 debuggers=(gdb valgrind heaptrack strace ltrace)
 profilers=(perf hyperfine)
 hardware_awareness=(numactl hwloc turbostat)
-aur_only=(likwid)
 
-run_cmd paru -S --noconfirm --needed "${debuggers[@]}" "${profilers[@]}" "${hardware_awareness[@]}" "${aur_only[@]}"
+run_cmd sudo pacman -S --noconfirm --needed "${debuggers[@]}" "${profilers[@]}" "${hardware_awareness[@]}" 
 
