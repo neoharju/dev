@@ -6,5 +6,5 @@ export CC="gcc"
 export CXX="g++"
 export CFLAGS="-O3 -march=native -flto=auto -DNDEBUG -s"
 export CXXFLAGS="-O3 -march=native -flto=auto -DNDEBUG -s"
-export RUSTFLAGS="-C target-cpu=native -C opt-level=3 -C debuginfo=0 -C strip=symbols -C lto=fat"
+export RUSTFLAGS="-C target-cpu=native -C opt-level=3 -C debuginfo=0 -C strip=symbols"
 
