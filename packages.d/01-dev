@@ -10,7 +10,6 @@ script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 source "$script_dir/lib/common.sh"
 
 log_info "---- base dev ----"
-require_cmd paru
 
 # HyDE installs e.g. git base-devel starship, but left here incase I stop using
 # it 
