@@ -138,13 +138,13 @@ install_subdirs() {
 # dotfiles/home/.zsh_profile -> $HOME/.zsh_profile.
 install_files() {
     local src_root=$1
-    local dest_root=$1
+    local dest_root=$2
     if [[ ! -d "$src_root" ]]; then
         log_info "skipping $src_root (missing)"
         return 0
     fi
     
-    shopt -s nullglob
+    shopt -s nullglob dotglob
 
     local file
     for file in "$src_root"/*; do
@@ -152,7 +152,7 @@ install_files() {
         install_entry "$file" "$dest_root/$(basename "$file")"
     done
 
-    shopt -u nullglob
+    shopt -u nullglob dotglob
 }
 
 install_subdirs "$DEV_ENV/dotfiles/.config" "$XDG_CONFIG_HOME"
