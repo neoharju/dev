@@ -18,7 +18,7 @@ log_info "---- base dev ----"
 # it 
 build_tools=(cmake git base-devel ninja curl)
 cli_tools=(fzf ripgrep btop bc bat fd eza git-delta zoxide direnv starship jq tmux)
-lang_toolchains=(go stylua lua luarocks npm python-debugpy rust)
+lang_toolchains=(go stylua lua luarocks npm python-debugpy)
 apps=(gimp)
 shell=(zsh)
 fonts=(woff2-font-awesome ttf-jetbrains-mono-nerd ttf-nerd-fonts-symbols)
