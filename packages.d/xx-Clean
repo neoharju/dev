@@ -13,9 +13,21 @@ run_cmd sudo pacman -Scc
 # used during some of our rust installs
 run_cmd rm -rf "$HOME/.cargo/tmp/"
 
-run_cmd npm cache clean --force
-run_cmd go clean -cache -modcache
-# 
-run_cmd pip cache purge
-run_cmd conda clean --all
+# ------------------------------------
+run_if_exists() {
+    local cmd=$1
+    shift
+
+    if command -v "$cmd" >/dev/null 2>&1; then
+        run_cmd "$cmd" "$@"
+    else
+        log_info "skipping '$cmd' (not installed)"
+    fi
+}
+# ------------------------------------
+
+run_if_exists npm cache clean --force
+run_if_exists go clean -cache -modcache
+run_if_exists pip cache purge
+run_if_exists conda clean --all
 
