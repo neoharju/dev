@@ -94,7 +94,8 @@ safe_rm() {
 # behaviour identical whether DEST is currently a file, a directory, a
 # symlink, or missing entirely.
 install_entry() {
-    local src=$1 dest=$2
+    local src=$1
+    local dest=$2
 
     [[ -e "$src" ]] || die "source does not exist: $src"
     
@@ -104,7 +105,7 @@ install_entry() {
     if [[ "$link_mode" == "1" ]]; then
         run_cmd ln -s -- "$src" "$dest"
     else
-        run_cmd cp -r -- "$src" "$dest"
+        run_cmd cp -a -- "$src" "$dest"
     fi
 }
 
@@ -122,15 +123,14 @@ install_subdirs() {
         return 0
     fi
 
-    shopt -s nullglob
+    (
+        shopt -s nullglob
 
-    local dir
-    for dir in "$src_root"/*/; do
-        install_entry "$dir" "$dest_root/$(basename "$dir")"
-    done
-
-    shopt -u nullglob
-
+        local dir
+        for dir in "$src_root"/*; do
+            install_entry "$dir" "$dest_root/${dir##*/}"
+        done
+    )
 }
 
 # install_files SRC_ROOT DEST_ROOT
@@ -143,16 +143,16 @@ install_files() {
         log_info "skipping $src_root (missing)"
         return 0
     fi
-    
-    shopt -s nullglob dotglob
 
-    local file
-    for file in "$src_root"/*; do
-        [[ -f "$file" ]] || continue
-        install_entry "$file" "$dest_root/$(basename "$file")"
-    done
+    (
+        shopt -s nullglob dotglob
 
-    shopt -u nullglob dotglob
+        local file
+        for file in "$src_root"/*; do
+            [[ -f "$file" ]] || continue
+            install_entry "$file" "$dest_root/${file##*/}"
+        done
+    )
 }
 
 install_subdirs "$DEV_ENV/dotfiles/.config" "$XDG_CONFIG_HOME"

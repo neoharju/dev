@@ -10,10 +10,12 @@ source "$script_dir/lib/common.sh"
 # shellcheck source=../lib/optimize.sh
 source "$script_dir/lib/optimize.sh"
 
+log_info "---- vim ----"
+
 personal_dir="$HOME/personal"
 vim_src="$personal_dir/vim"
 
-mkdir -p -- "$personal_dir"
+run_cmd mkdir -p -- "$personal_dir"
 
 if [[ -d "$vim_src/.git" ]]; then
     log_info "vim already cloned at $vim_src, pulling latest instead"
