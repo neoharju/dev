@@ -16,7 +16,7 @@ log_info "---- base dev ----"
 
 # HyDE installs e.g. git base-devel starship, but left here incase I stop using
 # it 
-build_tools=(cmake git base-devel ninja curl)
+build_tools=(cmake git base-devel ninja curl wget)
 cli_tools=(less tree htop btop fzf ripgrep bc bat fd eza git-delta zoxide direnv starship jq tmux)
 lang_toolchains=(go stylua lua luarocks npm python-debugpy)
 apps=(gimp)
