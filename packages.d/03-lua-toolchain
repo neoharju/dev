@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# packages.d/lua-toolchain
+#
+# testing
+set -euo pipefail
+
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+# shellcheck source=../lib/common.sh
+source "$script_dir/lib/common.sh"
+# shellcheck source=../lib/optimize.sh
+source "$script_dir/lib/optimize.sh"
+
+require_cmd curl
+require_cmd tar
+require_cmd make
+require_cmd wget
+
+log_info "---- lua-toolchain ----"
+
+personal_dir="$HOME/personal"
+lua_src="$personal_dir/lua"
+
+run_cmd mkdir -p -- "$lua_src"
+lua_version="lua-5.5.1"
+luarocks_version="luarocks-3.13.0"
+
+if [[ -d "$lua_src/$lua_version" ]]; then
+    log_info "$lua_version already cloned at $lua_src skipping download"
+else
+    (
+        cd -- "$lua_src"
+        run_cmd curl -L -R -O https://www.lua.org/ftp/$lua_version.tar.gz
+        run_cmd tar zxf $lua_version.tar.gz
+    )
+fi
+(
+    log_info "Installing lua..."
+    cd -- "$lua_src/$lua_version"
+    run_cmd make CFLAGS="$CFLAGS -D_FORTIFY_SOURC=3 -DLUA_USE_LINUX" \
+	   	 LDFLAGS="$LDFLAGS -Wl,-E -ldl" \
+		 all test
+)
+
+
+if [[ -d "$lua_src/$luarocks_version" ]]; then
+    log_info "$luarocks_version already cloned at $lua_src skipping download"
+else
+    (
+        cd -- "$lua_src"
+        log_info "Downloading $luarocks_version"
+	run_cmd wget https://luarocks.org/releases/luarocks-3.13.0.tar.gz
+        run_cmd tar zxpf $luarocks_version.tar.gz
+    )
+fi
+
+(
+    log_info "Installing luarocks..."
+    cd -- "$lua_src/$luarocks_version"
+    ./configure && \
+    make CFLAGS="$CFLAGS -D_FORTIFY_SOURCE=3 -DLUA_USE_LINUX" \
+	   	 LDFLAGS="$LDFLAGS -Wl,-E -ldl" && \
+    sudo -E make install
+)
+(
+    CFLAGS+=" -D_FORTIFY_SOURCE=3 "
+    log_info "Installing luarock tools..."
+    run_cmd sudo -E luarocks install luasocket --force
+    run_cmd sudo -E luarocks install luasec --force
+)
