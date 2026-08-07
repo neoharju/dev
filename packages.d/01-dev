@@ -18,7 +18,7 @@ log_info "---- base dev ----"
 # it 
 build_tools=(cmake git base-devel ninja curl wget)
 cli_tools=(less tree htop btop fzf ripgrep bc bat fd eza git-delta zoxide direnv starship jq tmux)
-lang_toolchains=(go stylua lua luarocks npm python-debugpy)
+lang_toolchains=(go stylua npm python-debugpy)
 apps=(gimp)
 shell=(zsh)
 fonts=(woff2-font-awesome ttf-jetbrains-mono-nerd ttf-nerd-fonts-symbols)
@@ -27,8 +27,6 @@ run_cmd sudo pacman -S --noconfirm --needed \
 	"${build_tools[@]}" "${cli_tools[@]}" "${lang_toolchains[@]}" "${apps[@]}" \
     "${shell[@]}"	
 
-# TODO: fix luacheck install
-#run_cmd luarocks install luacheck
 run_cmd go install github.com/air-verse/air@latest
 run_cmd sudo pacman -S --noconfirm --needed "${fonts[@]}"
 
