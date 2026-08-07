@@ -15,6 +15,7 @@ install_scripts=(
 	"lib/common.sh"
 	"lib/optimize.sh"
 	"lib/optimize-no-lto.sh"
+	"lib/preinstall.sh"
 	"packages.d/01-dev"
 	"packages.d/02-cpp-toolchain"
 	"packages.d/03-lua-toolchain"

@@ -34,6 +34,21 @@ set -euo pipefail
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=lib/common.sh
 source "$script_dir/lib/common.sh"
+# shellcheck source=lib/preinstall.sh
+source "$script_dir/lib/preinstall.sh"
+
+prechecks() {
+    local available_mb
+    available_mb="$(disk_space_mb)"
+    if (( available_mb < MIN_DISK_MB )); then
+        log_warn "Only $available_mb MB disk space available."
+    fi
+    require_pacman
+    require_not_root
+}
+
+prechecks
+check_sudo
 
 usage() {
     cat <<'EOF'
