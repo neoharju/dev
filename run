@@ -142,6 +142,7 @@ declare -A interactive_warnings=(
 
 total=${#matched[@]}
 i=0
+completed=()
 for script in "${matched[@]}"; do
     i=$((i+1))
     name=$(basename -- "$script")
@@ -159,11 +160,23 @@ for script in "${matched[@]}"; do
     fi
 
     if run_cmd "$script"; then
-        :
+		completed+=("$name")
+		:
     else
         status=$?
-        log_error "$script failed (exit $status)"
-        remaining=("${matched[@]}:i")
+        # 130 = 128 + SIGINT; you pressed ctrl+C
+		if ((status == 130)); then
+			log_warn "$script interrupted (Ctrl+C)."
+		else
+			log_error "$script failed (exit $status)"
+		fi
+
+		if ((${#completed[@]} > 0)); then
+			log_info "Completed: ${completed[*]}"
+		fi
+		log_info "Did not complete: $name"
+
+        remaining=("${matched[@]:i}")
         if ((${#remaining[@]} > 0)); then
             log_error "stopping here, not attempted: ${remaining[*]#./packages.d/}"
         fi
